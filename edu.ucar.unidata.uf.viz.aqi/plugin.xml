@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+	<extension
+	      point="org.eclipse.ui.commands">
+	      <command
+	      	 name="Load AQI Resource"
+             id="edu.ucar.unidata.uf.viz.aqi.loadAQIResource">
+	      </command>
+	</extension>
+	
+	<extension
+	      point="org.eclipse.ui.handlers">
+	      <handler
+             commandId="edu.ucar.unidata.uf.viz.aqi.loadAQIResource"
+             class="edu.ucar.unidata.uf.viz.aqi.rsc.handler.AQIResourceLoader">
+	      </handler>
+	</extension>
+	
+	<extension
+	      point="org.eclipse.ui.menus">
+	      <menuContribution
+             locationURI="menu:radar">
+             <command
+                   label="AQI Resource"
+                   commandId="com.raytheon.uf.viz.ui.loadbundle">
+                   <parameter
+                   		 name="bundleFile"
+                         value="bundles/aqi/resource.xml">
+                   </parameter>
+             </command>
+	      </menuContribution>
+	</extension>
+	
+	<extension
+	      point="com.raytheon.viz.ui.contextualMenu">
+	    <contextualMenu
+	          actionClass="edu.ucar.unidata.uf.viz.aqi.ui.OpenAQIInfoAction"
+	          capabilityInterface="edu.ucar.unidata.uf.viz.aqi.IAQIDataResource"
+	          name="AQI info..."
+	          sortID="50">
+	    </contextualMenu>
+	</extension>
+	
+</plugin>

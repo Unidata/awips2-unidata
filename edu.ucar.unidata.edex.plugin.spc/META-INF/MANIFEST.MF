@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SPC Decoder
+Bundle-SymbolicName: edu.ucar.unidata.edex.plugin.spc
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Unidata
+Eclipse-RegisterBuddy: com.raytheon.edex.common, com.raytheon.uf.common.serialization
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.raytheon.uf.common.dataplugin;bundle-version="1.12.1174",
+ com.raytheon.uf.common.geospatial;bundle-version="1.12.1174",
+ org.dom4j;bundle-version="1.0.0",
+ com.raytheon.uf.common.status;bundle-version="1.12.1174",
+ edu.ucar.unidata.common.dataplugin.spc,
+ org.joda.time,
+ de.micromata.opengis.kml,
+ org.geotools
+Export-Package: edu.ucar.unidata.edex.plugin.spc
+Import-Package: com.mchange.v2.lang,
+ org.joda.time

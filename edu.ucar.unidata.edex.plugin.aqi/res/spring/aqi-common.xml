@@ -1,0 +1,21 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd  
+  http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<bean id="aqiPluginName" class="java.lang.String">
+		<constructor-arg type="java.lang.String" value="aqi" />
+	</bean>
+
+	<bean id="aqiProperties" class="com.raytheon.uf.common.dataplugin.PluginProperties">
+		<property name="pluginName" ref="aqiPluginName" />
+		<property name="pluginFQN" value="edu.ucar.unidata.common.dataplugin.aqi" />
+		<property name="record" value="edu.ucar.unidata.dataplugin.aqi.AQIRecord" />
+	</bean>
+	
+	<bean id="aqiRegistered" factory-bean="pluginRegistry" factory-method="register">
+		<constructor-arg ref="aqiPluginName"/>
+		<constructor-arg ref="aqiProperties"/>
+	</bean>
+
+</beans>

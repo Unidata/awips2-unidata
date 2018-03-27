@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: AQI Viz
+Bundle-SymbolicName: edu.ucar.unidata.uf.viz.aqi;singleton:=true
+Bundle-Version: 1.15.0.qualifier
+Bundle-Vendor: Unidata
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.raytheon.uf.viz.core;bundle-version="1.14.6",
+ org.eclipse.ui;bundle-version="3.8.2",
+ com.raytheon.uf.common.geospatial;bundle-version="1.14.2",
+ com.raytheon.uf.common.colormap;bundle-version="1.14.0",
+ com.raytheon.uf.viz.core.rsc;bundle-version="1.14.1",
+ org.geotools,
+ com.raytheon.uf.common.time;bundle-version="1.16.0",
+ com.raytheon.uf.common.dataplugin;bundle-version="1.14.0",
+ javax.measure;bundle-version="1.0.0",
+ com.raytheon.viz.ui,
+ edu.ucar.unidata.common.dataplugin.aqi;bundle-version="1.0.0"
+Export-Package: edu.ucar.unidata.uf.viz.aqi,
+ edu.ucar.unidata.uf.viz.aqi.rsc
+Import-Package: com.raytheon.uf.viz.core.rsc.interrogation
