@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd   
   http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-	<bean id="spcDecoder" class="edu.ucar.unidata.edex.plugin.spc.AQIDecoder"/>
+	<bean id="spcDecoder" class="edu.ucar.unidata.edex.plugin.spc.SPCDecoder"/>
 
     <bean id="spcDistRegistry" factory-bean="distributionSrv" factory-method="register">
 		<constructor-arg ref="spcPluginName" />
