@@ -10,7 +10,7 @@
 	<bean id="spcProperties" class="com.raytheon.uf.common.dataplugin.PluginProperties">
 		<property name="pluginName" ref="spcPluginName" />
 		<property name="pluginFQN" value="edu.ucar.unidata.common.dataplugin.spc" />
-		<property name="record" value="edu.ucar.unidata.common.dataplugin.spc.spcRecord" />
+		<property name="record" value="edu.ucar.unidata.common.dataplugin.spc.SPCRecord" />
 	</bean>
 	
 	<bean id="spcRegistered" factory-bean="pluginRegistry" factory-method="register">
