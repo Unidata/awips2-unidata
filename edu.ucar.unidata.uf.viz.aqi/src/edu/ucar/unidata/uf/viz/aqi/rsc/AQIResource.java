@@ -154,8 +154,7 @@ public class AQIResource extends
         ColorMapParameters params = new ColorMapParameters();
 
         try {
-            params.setColorMap(ColorMapLoader.loadColorMap("AQI"
-                    + IPathManager.SEPARATOR + "Default Colormap"));
+            params.setColorMap(ColorMapLoader.loadColorMap("Air Quality Index"));
         } catch (ColorMapException e) {
             throw new VizException(e);
         }
