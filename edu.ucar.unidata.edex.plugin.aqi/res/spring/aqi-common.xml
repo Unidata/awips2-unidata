@@ -10,7 +10,7 @@
 	<bean id="aqiProperties" class="com.raytheon.uf.common.dataplugin.PluginProperties">
 		<property name="pluginName" ref="aqiPluginName" />
 		<property name="pluginFQN" value="edu.ucar.unidata.common.dataplugin.aqi" />
-		<property name="record" value="edu.ucar.unidata.dataplugin.aqi.AQIRecord" />
+		<property name="record" value="edu.ucar.unidata.common.dataplugin.aqi.AQIRecord" />
 	</bean>
 	
 	<bean id="aqiRegistered" factory-bean="pluginRegistry" factory-method="register">
