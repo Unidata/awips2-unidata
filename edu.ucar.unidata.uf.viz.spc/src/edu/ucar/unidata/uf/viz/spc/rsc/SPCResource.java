@@ -120,7 +120,6 @@ public class SPCResource extends
 
     private Map<String, RGB> MAPPING = getColorMapping();
 
-    // Store unprocessed/new records
     private Map<DataTime, Collection<SPCRecord>> unprocessedRecords = new HashMap<DataTime, Collection<SPCRecord>>();
 
     List<IShadedShape> shapeList = new ArrayList<IShadedShape>();
@@ -143,7 +142,6 @@ public class SPCResource extends
     protected SPCResource(SPCResourceData resourceData,
             LoadProperties loadProperties, PluginDataObject[] pdos) {
         super(resourceData, loadProperties);
-        //addDataObject(pdos);
         resourceData.addChangeListener(new IResourceDataChanged() {
             @Override
             public void resourceChanged(ChangeType type, Object object) {
@@ -158,7 +156,6 @@ public class SPCResource extends
             } 
         });
         this.dataTimes = new ArrayList<DataTime>();
-
     }
 
 	@Override
@@ -207,7 +204,6 @@ public class SPCResource extends
             PaintProperties paintProps) throws VizException {
         this.displayedDataTime = paintProps.getDataTime();
 
-        // Check for new data
         Collection<SPCRecord> unprocessed = null;
         synchronized (unprocessedRecords) {
             unprocessed = unprocessedRecords.get(this.displayedDataTime);
@@ -232,7 +228,6 @@ public class SPCResource extends
                 descriptor);
         JTSGeometryData geomData = shapeCompiler.createGeometryData();
         geomData.setWorldWrapCorrect(true);
-        geomData.setPointStyle(PointStyle.CROSS);
         try {
             geomData.setGeometryColor(color);
             shapeCompiler.handle(g, geomData);
