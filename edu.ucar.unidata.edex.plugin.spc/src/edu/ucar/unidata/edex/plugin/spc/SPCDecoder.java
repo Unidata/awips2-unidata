@@ -11,11 +11,9 @@ import com.raytheon.uf.common.dataplugin.PluginDataObject;
 import com.raytheon.uf.common.status.IUFStatusHandler;
 import com.raytheon.uf.common.status.UFStatus;
 import com.raytheon.uf.common.time.DataTime;
-import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
-import de.micromata.opengis.kml.v_2_2_0.Coordinate;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Feature;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
@@ -58,30 +56,31 @@ public class SPCDecoder {
 				"xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\"" );
 
 		ByteArrayInputStream stream = new ByteArrayInputStream( input.getBytes( "UTF-8" ) );
-
+		
 		try {
 			Document document = (Document) Kml.unmarshal(stream).getFeature();
 			List<Feature> folders = document.getFeature();
-
+	
 			for(Feature feature : folders) {
 				String folderName = feature.getName();
 				// SPC categorical outlook
 				if (feature instanceof Folder && folderName.endsWith("_cat")) {
-
+	
 					Folder folder = (Folder) feature;
 					List<Feature> placemarkList = folder.getFeature();
-
+	
 					for (Feature mark : placemarkList ) {
 						Placemark placemark = (Placemark) mark;
 						String category = placemark.getName();
 						Geometry geometry = placemark.getGeometry();
 						if(geometry instanceof Polygon) {
 							Polygon polygon = (Polygon) geometry;
+							
 							Boundary outerBoundaryIs = polygon.getOuterBoundaryIs();
 							if(outerBoundaryIs != null) {
 								LinearRing linearRing = outerBoundaryIs.getLinearRing();
 								if(linearRing != null) {
-									List<Coordinate> coordinates = linearRing.getCoordinates();
+									List<de.micromata.opengis.kml.v_2_2_0.Coordinate> coordinates = linearRing.getCoordinates();
 									if(coordinates != null) {
 										TimeSpan timePrimitive = (TimeSpan) placemark.getTimePrimitive();
 										String dateString = timePrimitive.getBegin();
@@ -90,14 +89,22 @@ public class SPCDecoder {
 										DataTime dataTime = new DataTime(date);
 										try {
 											SPCRecord record = new SPCRecord();
-											record.setName(category);
-											record.setGeometry(geomFact.createPolygon(
-													(CoordinateSequence) coordinates));
+											record.setReportName(category);
+											com.vividsolutions.jts.geom.LinearRing outer = 
+													changeLinearRingJAKenJTS(polygon.getOuterBoundaryIs().getLinearRing());
+											List<Boundary> bound = polygon.getInnerBoundaryIs();
+											int j = 0;
+											com.vividsolutions.jts.geom.LinearRing[] inner = 
+													new com.vividsolutions.jts.geom.LinearRing[bound.size()];
+											for (Boundary b : bound) {
+												inner[j] = changeLinearRingJAKenJTS(b.getLinearRing());
+												j++;
+											}
+											record.setGeometry(geomFact.createPolygon(outer, inner));
 											record.setDataTime(dataTime);
 											list.add(record);
-
 										} catch (Exception ex) {
-
+											ex.printStackTrace();
 										}
 									}
 								}
@@ -106,12 +113,36 @@ public class SPCDecoder {
 					}
 					logger.info(placemarkList.size() + " polygons processed for KML feature " + folderName.toString() );
 				}
-			}
+			} 
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+
 		// Process the list and send back an array of the PluginDataObjects
-		return (list.toArray(new PluginDataObject[list.size()]));
+		PluginDataObject[] decodedData = list.toArray(new PluginDataObject[list.size()]);
+		return (decodedData);
 	}
 
+	public com.vividsolutions.jts.geom.LinearRing changeLinearRingJAKenJTS(
+			de.micromata.opengis.kml.v_2_2_0.LinearRing l) {
+		return geomFact.createLinearRing(this.changementCoord(l.getCoordinates()));
+	}
+	
+	public com.vividsolutions.jts.geom.Coordinate[] changementCoord(
+			List<de.micromata.opengis.kml.v_2_2_0.Coordinate> listJAK) {
+		com.vividsolutions.jts.geom.Coordinate[] listJTS = new com.vividsolutions.jts.geom.Coordinate[listJAK
+				.size()];
+		int j = 0;
+		for (de.micromata.opengis.kml.v_2_2_0.Coordinate i : listJAK) {
+			com.vividsolutions.jts.geom.Coordinate b = new com.vividsolutions.jts.geom.Coordinate();
+			b.x = i.getLongitude();
+			b.y = i.getLatitude();
+			b.z = i.getAltitude();
+			listJTS[j] = b;
+			j = j + 1;
+		}
+		return listJTS;
+	}
 }
