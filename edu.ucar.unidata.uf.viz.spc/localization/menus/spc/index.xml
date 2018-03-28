@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<menuContributionFile>
+    <include installTo="menu:d2d.obsMenu" 
+             fileName="menus/spc/spc.xml"/>
+</menuContributionFile>
