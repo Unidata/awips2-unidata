@@ -23,12 +23,10 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * SPC Convective Outlook Record
  * 
- * <pre>
  * SOFTWARE HISTORY
  * Date         Ticket#     Engineer    Description
  * ------------ ----------  ----------- --------------------------
  * Mar 27, 2018             mjames@ucar  Initial creation
- * </pre>
  * 
  * @author mjames
  */
@@ -78,7 +76,7 @@ public class SPCRecord extends PluginDataObject {
     }
     
     /**
-     * Convstructs an SPC record from a dataURI
+     * Constructs an SPC record from a dataURI
      * 
      * @param uri
      *            The dataURI

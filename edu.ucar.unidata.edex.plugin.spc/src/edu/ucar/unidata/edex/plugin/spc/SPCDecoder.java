@@ -19,6 +19,7 @@ import de.micromata.opengis.kml.v_2_2_0.Feature;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
 import de.micromata.opengis.kml.v_2_2_0.Geometry;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
+import de.micromata.opengis.kml.v_2_2_0.Coordinate;
 import de.micromata.opengis.kml.v_2_2_0.LinearRing;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Polygon;
@@ -41,6 +42,7 @@ import edu.ucar.unidata.common.dataplugin.spc.SPCRecord;
  *
  * @author mjames
  */
+
 public class SPCDecoder {
 
 	GeometryFactory geomFact = new GeometryFactory();
@@ -51,7 +53,7 @@ public class SPCDecoder {
 
 		ArrayList<SPCRecord> list = new ArrayList<SPCRecord>();
 
-		// Modification needed for KML unmarshaling
+		// Modification needed for unmarshaling
 		String input = new String(data).replace("xmlns=\"http://earth.google.com/kml/2.2\"", 
 				"xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\"" );
 
@@ -63,7 +65,9 @@ public class SPCDecoder {
 	
 			for(Feature feature : folders) {
 				String folderName = feature.getName();
+				
 				// SPC categorical outlook
+				// TODO: probabalistic outlooks
 				if (feature instanceof Folder && folderName.endsWith("_cat")) {
 	
 					Folder folder = (Folder) feature;
@@ -91,13 +95,13 @@ public class SPCDecoder {
 											SPCRecord record = new SPCRecord();
 											record.setReportName(category);
 											com.vividsolutions.jts.geom.LinearRing outer = 
-													changeLinearRingJAKenJTS(polygon.getOuterBoundaryIs().getLinearRing());
+													modifyLinearRing(polygon.getOuterBoundaryIs().getLinearRing());
 											List<Boundary> bound = polygon.getInnerBoundaryIs();
 											int j = 0;
 											com.vividsolutions.jts.geom.LinearRing[] inner = 
 													new com.vividsolutions.jts.geom.LinearRing[bound.size()];
 											for (Boundary b : bound) {
-												inner[j] = changeLinearRingJAKenJTS(b.getLinearRing());
+												inner[j] = modifyLinearRing(b.getLinearRing());
 												j++;
 											}
 											record.setGeometry(geomFact.createPolygon(outer, inner));
@@ -119,30 +123,24 @@ public class SPCDecoder {
 			e.printStackTrace();
 		}
 		
-
-		// Process the list and send back an array of the PluginDataObjects
 		PluginDataObject[] decodedData = list.toArray(new PluginDataObject[list.size()]);
 		return (decodedData);
 	}
 
-	public com.vividsolutions.jts.geom.LinearRing changeLinearRingJAKenJTS(
-			de.micromata.opengis.kml.v_2_2_0.LinearRing l) {
-		return geomFact.createLinearRing(this.changementCoord(l.getCoordinates()));
+	public com.vividsolutions.jts.geom.LinearRing modifyLinearRing(LinearRing l) {
+		return geomFact.createLinearRing(this.convertCoords(l.getCoordinates()));
 	}
 	
-	public com.vividsolutions.jts.geom.Coordinate[] changementCoord(
-			List<de.micromata.opengis.kml.v_2_2_0.Coordinate> listJAK) {
-		com.vividsolutions.jts.geom.Coordinate[] listJTS = new com.vividsolutions.jts.geom.Coordinate[listJAK
-				.size()];
+	public com.vividsolutions.jts.geom.Coordinate[] convertCoords(List<Coordinate> geomList) {
+		com.vividsolutions.jts.geom.Coordinate[] coordList = new com.vividsolutions.jts.geom.Coordinate[geomList.size()];
 		int j = 0;
-		for (de.micromata.opengis.kml.v_2_2_0.Coordinate i : listJAK) {
+		for (Coordinate i : geomList) {
 			com.vividsolutions.jts.geom.Coordinate b = new com.vividsolutions.jts.geom.Coordinate();
 			b.x = i.getLongitude();
 			b.y = i.getLatitude();
-			b.z = i.getAltitude();
-			listJTS[j] = b;
+			coordList[j] = b;
 			j = j + 1;
 		}
-		return listJTS;
+		return coordList;
 	}
 }
