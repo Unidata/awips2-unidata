@@ -72,8 +72,9 @@ public class SPCDecoder {
 	
 					Folder folder = (Folder) feature;
 					List<Feature> placemarkList = folder.getFeature();
-	
+					int i = 0;
 					for (Feature mark : placemarkList ) {
+						i++;
 						Placemark placemark = (Placemark) mark;
 						String category = placemark.getName();
 						Geometry geometry = placemark.getGeometry();
@@ -88,7 +89,6 @@ public class SPCDecoder {
 									if(coordinates != null) {
 										TimeSpan timePrimitive = (TimeSpan) placemark.getTimePrimitive();
 										String dateString = timePrimitive.getBegin();
-										//String pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 										Date date = new DateTime(dateString).toDate();
 										DataTime dataTime = new DataTime(date);
 										try {
@@ -104,8 +104,10 @@ public class SPCDecoder {
 												inner[j] = modifyLinearRing(b.getLinearRing());
 												j++;
 											}
+											
 											record.setGeometry(geomFact.createPolygon(outer, inner));
 											record.setDataTime(dataTime);
+											record.setPart(i);
 											list.add(record);
 										} catch (Exception ex) {
 											ex.printStackTrace();

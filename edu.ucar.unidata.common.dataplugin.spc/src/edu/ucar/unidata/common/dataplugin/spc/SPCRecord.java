@@ -54,11 +54,11 @@ public class SPCRecord extends PluginDataObject {
 	@DataURI(position = 1)
 	String reportName;
 
-	// threat level
-	@Column(length = 32)
+	// report part
+	@Column
     @DynamicSerializeElement
     @DataURI(position = 2)
-    private String level;
+    private Integer part;
 
 	@Column(name = "location", columnDefinition = "geometry")
 	@Type(type = "org.hibernate.spatial.GeometryType")
@@ -70,20 +70,10 @@ public class SPCRecord extends PluginDataObject {
      * Default Constructor
      */
     public SPCRecord() {
-        this.level = "";
+        this.part = null;
         this.reportName = SPCRecord.PLUGIN_NAME;
         this.geometry = null;
     }
-    
-    /**
-     * Constructs an SPC record from a dataURI
-     * 
-     * @param uri
-     *            The dataURI
-     */
-	public SPCRecord(String uri) {
-		super(uri);
-	}
 
 	public Geometry getGeometry() {
 		return geometry;
@@ -93,12 +83,12 @@ public class SPCRecord extends PluginDataObject {
 		this.geometry = geometry;
 	}
 	
-	public String getLevel() {
-		return level;
+	public Integer getPart() {
+		return part;
 	}
 
-	public void setLevel(String level) {
-		this.level = level;
+	public void setPart(Integer part) {
+		this.part = part;
 	}
 
 	public String getReportName() {
