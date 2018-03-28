@@ -17,7 +17,7 @@ public class SPCDecoderTest {
 		// TODO Auto-generated method stub
 		try {
 			InputStream stream = SPCDecoderTest.class
-					.getResourceAsStream("day2otlk_20180327_0600.kml");
+					.getResourceAsStream("day1otlk_20180328_2000.kml");
 			BufferedReader buf = new BufferedReader(new InputStreamReader(
 					stream));
 			String input = new String();
