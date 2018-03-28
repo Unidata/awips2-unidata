@@ -15,7 +15,8 @@ Require-Bundle: com.raytheon.uf.viz.core;bundle-version="1.14.6",
  com.raytheon.uf.common.dataplugin;bundle-version="1.14.0",
  javax.measure;bundle-version="1.0.0",
  com.raytheon.viz.ui,
- edu.ucar.unidata.common.dataplugin.spc;bundle-version="1.0.0"
+ edu.ucar.unidata.common.dataplugin.spc;bundle-version="1.0.0",
+ com.raytheon.viz.core
 Export-Package: edu.ucar.unidata.uf.viz.spc,
  edu.ucar.unidata.uf.viz.spc.rsc
 Import-Package: com.raytheon.uf.viz.core.rsc.interrogation

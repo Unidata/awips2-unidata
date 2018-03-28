@@ -1,342 +1,284 @@
 package edu.ucar.unidata.uf.viz.spc.rsc;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import javax.measure.unit.Unit;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.graphics.RGB;
-import org.opengis.referencing.FactoryException;
+import org.geotools.coverage.grid.GeneralGridGeometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.datum.PixelInCell;
-import org.opengis.referencing.operation.TransformException;
 
-import com.raytheon.uf.common.colormap.ColorMapException;
-import com.raytheon.uf.common.colormap.ColorMapLoader;
-import com.raytheon.uf.common.colormap.prefs.ColorMapParameters;
-import com.raytheon.uf.common.colormap.prefs.DataMappingPreferences;
-import com.raytheon.uf.common.colormap.prefs.DataMappingPreferences.DataMappingEntry;
 import com.raytheon.uf.common.dataplugin.PluginDataObject;
+
+import edu.ucar.unidata.common.dataplugin.spc.SPCRecord;
 import com.raytheon.uf.common.geospatial.ReferencedCoordinate;
-import com.raytheon.uf.common.localization.IPathManager;
-import com.raytheon.uf.common.time.BinOffset;
+import com.raytheon.uf.common.status.IUFStatusHandler;
+import com.raytheon.uf.common.status.UFStatus;
+import com.raytheon.uf.common.status.UFStatus.Priority;
 import com.raytheon.uf.common.time.DataTime;
-import com.raytheon.uf.viz.core.IExtent;
 import com.raytheon.uf.viz.core.IGraphicsTarget;
-import com.raytheon.uf.viz.core.drawables.IDescriptor;
-import com.raytheon.uf.viz.core.drawables.IRenderable;
-import com.raytheon.uf.viz.core.drawables.IRenderableDisplay;
 import com.raytheon.uf.viz.core.drawables.IShadedShape;
-import com.raytheon.uf.viz.core.drawables.IWireframeShape;
 import com.raytheon.uf.viz.core.drawables.PaintProperties;
 import com.raytheon.uf.viz.core.exception.VizException;
 import com.raytheon.uf.viz.core.map.IMapDescriptor;
-import com.raytheon.uf.viz.core.rsc.AbstractPluginDataObjectResource;
+import com.raytheon.uf.viz.core.map.MapDescriptor;
 import com.raytheon.uf.viz.core.rsc.AbstractVizResource;
-import com.raytheon.uf.viz.core.rsc.IPaintListener;
+import com.raytheon.uf.viz.core.rsc.IResourceDataChanged;
 import com.raytheon.uf.viz.core.rsc.LoadProperties;
-import com.raytheon.uf.viz.core.rsc.capabilities.AbstractCapability;
-import com.raytheon.uf.viz.core.rsc.capabilities.ColorMapCapability;
 import com.raytheon.uf.viz.core.rsc.capabilities.ColorableCapability;
-import com.raytheon.uf.viz.core.rsc.interrogation.Interrogatable;
-import com.raytheon.uf.viz.core.rsc.interrogation.InterrogateMap;
-import com.raytheon.uf.viz.core.rsc.interrogation.InterrogationKey;
-import com.vividsolutions.jts.geom.Coordinate;
-
-import edu.ucar.unidata.common.dataplugin.spc.SPCRecord;
-import edu.ucar.unidata.uf.viz.spc.SPCRenderable;
-import edu.ucar.unidata.uf.viz.spc.ISPCDataResource;
+import com.raytheon.viz.core.rsc.jts.JTSCompiler;
+import com.raytheon.viz.core.rsc.jts.JTSCompiler.JTSGeometryData;
+import com.raytheon.viz.core.rsc.jts.JTSCompiler.PointStyle;
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
+ * Resource for SPC data
+ * 
  * SOFTWARE HISTORY
  * 
  * Date         Ticket#    Engineer    Description
  * ------------ ---------- ----------- --------------------------
  * Mar 28, 2018            mjames@ucar Initial creation
  * 
- * @author mjames
+ * 
+ * @author mjames@ucar
  */
 
 public class SPCResource extends
-        AbstractPluginDataObjectResource<SPCResourceData, IMapDescriptor>
-        implements ISPCDataResource, IPaintListener {
-
-	private String resourceName = "SPC Convective Outlook";
+        AbstractVizResource<SPCResourceData, MapDescriptor> {
 	
-	protected class ConvectiveOutlookEntry {
+    private static final transient IUFStatusHandler statusHandler = UFStatus
+    .getHandler(SPCResource.class);
+    
+    private static final String[] category= { 
+    		"TSTM", 
+    		"MRGL", 
+    		"SLGT", 
+    		"ENH", 
+    		"MDT", 
+    		"HIGH"
+    	};
 
-        protected SPCRecord record;
+    private static final String[] categoryName = { 
+    		"General Thunder",
+    		"Marginal Risk",
+    		"Slight Risk",
+    		"Enhanced Risk",
+    		"Moderate Risk",
+    		"High Risk"
+    };
 
-        protected IWireframeShape wireframeShape;
+    private static final RGB[] categoryFillColor = { 
+    		new RGB(192, 232, 192), 
+    		new RGB(127, 197, 127), 
+    		new RGB(246, 246, 127), 
+    		new RGB(230, 194, 127), 
+    		new RGB(230, 127, 127), 
+    		new RGB(255, 127, 255), 
+    	};
+    
+    private static final RGB[] categoryLineColor = { 
+    		new RGB(255, 255, 255), 
+    		new RGB(60, 120, 60), 
+    		new RGB(255, 150, 0), 
+    		new RGB(215, 150, 60), 
+    		new RGB(150, 25, 0), 
+    		new RGB(200, 60, 150), 
+    	};
+    
+    public static String[] getCategory() {
+		return category;
+	}
 
-        protected IShadedShape shadedShape;
+	public static String[] getCategoryname() {
+		return categoryName;
+	}
 
+	public static RGB[] getCategoryfillcolor() {
+		return categoryFillColor;
+	}
+
+	public static RGB[] getCategorylinecolor() {
+		return categoryLineColor;
+	}
+    
+    private static Map<String, RGB> getColorMapping() {
+        Map<String, RGB> mapping = new LinkedHashMap<>();
+        int i=0;
+    		for (String name : categoryName ) {
+    			mapping.put(name, categoryFillColor[i]);
+    			i++;
+    		}
+        return mapping;
     }
-	
-	protected List<SPCRecord> recordsToLoad;
-	
-	protected Map<String, ConvectiveOutlookEntry> entryMap;
-	
-    private class SPCGroupRenderable implements IRenderable {
 
-        private List<SPCRenderable> renderables = new ArrayList<SPCRenderable>();
+    private Map<String, RGB> MAPPING = getColorMapping();
 
-        public SPCGroupRenderable(Collection<PluginDataObject> records) {
-            for (PluginDataObject obj : records) {
-                if (obj instanceof SPCRecord) {
-                    addRecord((SPCRecord) obj);
-                }
-            }
+    // Store unprocessed/new records
+    private Map<DataTime, Collection<SPCRecord>> unprocessedRecords = new HashMap<DataTime, Collection<SPCRecord>>();
+
+    List<IShadedShape> shapeList = new ArrayList<IShadedShape>();
+    
+    private DataTime displayedDataTime;
+    
+    private IShadedShape createShapeFromRecord(SPCRecord record, IGraphicsTarget target)
+            throws VizException {
+        Geometry geom = record.getGeometry();
+        RGB color = getCapability(ColorableCapability.class).getColor();
+        for (Entry<String, RGB> entry : MAPPING.entrySet()) {
+        		if (entry.getKey().equals(record.getReportName())) {
+        			color = entry.getValue();
+        			break;
+        		}
         }
-
-        public void addRecord(SPCRecord record) {
-//        		ConvectiveOutlookEntry entry = entryMap.get(record.getDataURI());
-//        		if (entry == null) {
-//                entry = new ConvectiveOutlookEntry();
-//                entry.record = record;
-//                entryMap.put(record.getDataURI(), entry);
-//            }
-//            IWireframeShape wfs = entry.wireframeShape;
-//            if (wfs != null) wfs.dispose();
-//            
-            SPCRenderable renderable = new SPCRenderable(getDescriptor());
-            renderable.setRecord(record);
-            renderables.add(renderable);
-        }
-
-        @Override
-        public void paint(IGraphicsTarget target, PaintProperties paintProps)
-                throws VizException {
-            RGB color = getCapability(ColorableCapability.class).getColor();
-            
-            for (SPCRenderable renderable : renderables) {
-                renderable.setColor(color);
-                renderable.paint(target, paintProps);
-            }
-        }
-
-        public Collection<SPCRecord> getRecords() {
-            List<SPCRecord> records = new ArrayList<SPCRecord>(renderables.size());
-            for (SPCRenderable renderable : renderables) {
-                records.add(renderable.getRecord());
-            }
-            return records;
-        }
+        return computeShape(target, descriptor, geom, color);
     }
 
-    /**
-     * @param resourceData
-     * @param loadProperties
-     */
     protected SPCResource(SPCResourceData resourceData,
             LoadProperties loadProperties, PluginDataObject[] pdos) {
         super(resourceData, loadProperties);
-        addDataObject(pdos);
+        //addDataObject(pdos);
+        resourceData.addChangeListener(new IResourceDataChanged() {
+            @Override
+            public void resourceChanged(ChangeType type, Object object) {
+                if (type == ChangeType.DATA_UPDATE) {
+                    for (PluginDataObject p : pdos) {
+                        if (p instanceof SPCRecord) {
+                            addRecord((SPCRecord) p);
+                        }
+                    }
+                }
+                issueRefresh();
+            } 
+        });
+        this.dataTimes = new ArrayList<DataTime>();
+
+    }
+
+	@Override
+    protected void disposeInternal() {
+    }
+
+    @Override
+    public DataTime[] getDataTimes() {
+        if (this.dataTimes == null) {
+            return new DataTime[0];
+        }
+        return this.dataTimes.toArray(new DataTime[this.dataTimes.size()]);
     }
 
     @Override
     protected void initInternal(IGraphicsTarget target) throws VizException {
-        super.initInternal(target);
-        
-        ColorMapParameters params = new ColorMapParameters();
-
-        try {
-            params.setColorMap(ColorMapLoader.loadColorMap("Grid/Gridded Data"));
-        } catch (ColorMapException e) {
-            throw new VizException(e);
-        }
-
-        DataMappingPreferences preferences = new DataMappingPreferences();
-
-        DataMappingEntry entry = new DataMappingEntry();
-        entry.setDisplayValue(0.0);
-        entry.setPixelValue(0.0);
-        entry.setSample("TSTM");
-        preferences.addEntry(entry);
-
-        entry = new DataMappingEntry();
-        entry.setDisplayValue(50.0);
-        entry.setPixelValue(1.0);
-        entry.setSample("MRGL");
-        preferences.addEntry(entry);
-
-        entry = new DataMappingEntry();
-        entry.setDisplayValue(100.0);
-        entry.setPixelValue(2.0);
-        entry.setSample("SLGT");
-        preferences.addEntry(entry);
-
-        entry = new DataMappingEntry();
-        entry.setDisplayValue(150.0);
-        entry.setPixelValue(3.0);
-        entry.setSample("ENH");
-        preferences.addEntry(entry);
-
-        entry = new DataMappingEntry();
-        entry.setDisplayValue(200.0);
-        entry.setPixelValue(4.0);
-        entry.setSample("MDT");
-        preferences.addEntry(entry);
-
-        entry = new DataMappingEntry();
-        entry.setDisplayValue(300.0);
-        entry.setPixelValue(5.0);
-        entry.setSample("HIGH");
-        preferences.addEntry(entry);
-
-        entry = new DataMappingEntry();
-        entry.setDisplayValue(400.0);
-        entry.setPixelValue(6.0);
-        preferences.addEntry(entry);
-
-        params.setDisplayUnit(Unit.ONE);
-        params.setDataMapping(preferences);
-        params.setColorMapMin(0);
-        params.setColorMapMax(6);
-
-        getCapability(ColorMapCapability.class).setColorMapParameters(params);
-        
-        registerListener(this);
-
-    }
-
-    @Override
-	protected void disposeResource() {
-		unregisterListener(this);
-		super.disposeResource();
-	}
-
-	@Override
-    protected DataTime getDataObjectTime(PluginDataObject pdo) {
-        BinOffset offset = resourceData.getBinOffset();
-        if (offset != null) {
-            return offset.getNormalizedTime(super.getDataObjectTime(pdo));
-        }
-        return super.getDataObjectTime(pdo);
-    }
-
-    @Override
-    protected void disposeRenderable(IRenderable renderable) {
-
-    }
-
-    @Override
-    protected boolean projectRenderable(IRenderable renderable,
-            CoordinateReferenceSystem crs) throws VizException {
-        return false;
-    }
-
-    @Override
-    protected IRenderable constructRenderable(DataTime time,
-            List<PluginDataObject> records) throws VizException {
-        return new SPCGroupRenderable(records);
-    }
-
-    @Override
-    protected boolean updateRenderable(IRenderable renderable,
-            PluginDataObject... pdos) {
-        SPCGroupRenderable groupRenderable = (SPCGroupRenderable) renderable;
-        for (PluginDataObject pdo : pdos) {
-            if (pdo instanceof SPCRecord) {
-                groupRenderable.addRecord((SPCRecord) pdo);
-            }
-        }
-        return true;
     }
 
     @Override
     public String inspect(ReferencedCoordinate coord) throws VizException {
-        InterrogateMap dataMap = interrogate(coord,
-                descriptor.getTimeForResource(this),
-                ISPCDataResource.CLOSEST_SPC_RECORD_INTERROGATE_KEY);
-        SPCRecord record = dataMap
-                .get(ISPCDataResource.CLOSEST_SPC_RECORD_INTERROGATE_KEY);
-        if (record != null) {
-            ColorMapParameters params = getCapability(ColorMapCapability.class)
-                    .getColorMapParameters();
-            DataMappingPreferences prefs = params.getDataMapping();
-            return record.getReportName() + " @ " + record.getDataTime();
+		return null;
+    }
+
+    /**
+     * process all records for the displayedDataTime
+     * 
+     * @param target
+     * @param paintProps
+     * @throws VizException
+     */
+    @SuppressWarnings("null")
+	private void updateRecords(IGraphicsTarget target,
+            PaintProperties paintProps) throws VizException {
+
+        Collection<SPCRecord> newRecords = null;
+        synchronized (unprocessedRecords) {
+            newRecords = unprocessedRecords.get(this.displayedDataTime);
         }
-        return super.inspect(coord);
+        for (SPCRecord record : newRecords) {
+        		target.drawShadedShape(createShapeFromRecord(record, target), 0.5f, 1.0f);
+        }
     }
 
     @Override
-    public Set<InterrogationKey<?>> getInterrogationKeys() {
-        return new HashSet<InterrogationKey<?>>(Arrays.asList(
-                ISPCDataResource.SPC_RECORDS_INTERROGATE_KEY,
-                ISPCDataResource.CLOSEST_SPC_RECORD_INTERROGATE_KEY));
+    protected void paintInternal(IGraphicsTarget target,
+            PaintProperties paintProps) throws VizException {
+        this.displayedDataTime = paintProps.getDataTime();
+
+        // Check for new data
+        Collection<SPCRecord> unprocessed = null;
+        synchronized (unprocessedRecords) {
+            unprocessed = unprocessedRecords.get(this.displayedDataTime);
+        }
+        if (unprocessed != null && unprocessed.size() > 0) {
+            updateRecords(target, paintProps);
+        }
+
+        // Draw the text
+        //for (SPCRecord record : frame.records) {
+        //	if (isPaintingText(record)) {
+        //		paintText(record, target);
+        //	}
+        //}
     }
 
-    @Override
-    public InterrogateMap interrogate(ReferencedCoordinate coordinate,
-            DataTime time, InterrogationKey<?>... keys) {
-        InterrogateMap map = new InterrogateMap();
-        if (time != null) {
-            Collection<SPCRecord> records = null;
-            try {
-                // We have data for this frame, get the renderable
-                SPCGroupRenderable renderable = (SPCGroupRenderable) getOrCreateRenderable(time);
-                records = renderable.getRecords();
-            } catch (VizException e) {
-                statusHandler.error("Error interrogating SPC Resource", e);
+    private IShadedShape computeShape(IGraphicsTarget target,
+            IMapDescriptor descriptor, Geometry g, RGB color) {
+        IShadedShape newShadedShape = target.createShadedShape(false,
+                new GeneralGridGeometry(descriptor.getGridGeometry()));
+        JTSCompiler shapeCompiler = new JTSCompiler(newShadedShape, null,
+                descriptor);
+        JTSGeometryData geomData = shapeCompiler.createGeometryData();
+        geomData.setWorldWrapCorrect(true);
+        geomData.setPointStyle(PointStyle.CROSS);
+        try {
+            geomData.setGeometryColor(color);
+            shapeCompiler.handle(g, geomData);
+        } catch (VizException e) {
+            statusHandler.handle(Priority.PROBLEM,
+                    "Error computing shaded shape", e);
+        }
+        newShadedShape.compile();
+        return newShadedShape;
+    }
+
+    /**
+     * Adds a new record to this resource
+     * 
+     * @param obj
+     */
+    protected void addRecord(SPCRecord obj) {
+        DataTime dataTime = obj.getDataTime();
+        Collection<SPCRecord> records = null;
+        boolean brandNew = false;
+        synchronized (unprocessedRecords) {
+            records = unprocessedRecords.get(dataTime);
+            if (records == null) {
+                records = new LinkedHashSet<SPCRecord>();
+                unprocessedRecords.put(dataTime, records);
+                brandNew = true;
             }
         }
-        return map;
-
-    }
-
-    @Override
-    protected void capabilityChanged(IRenderable renderable,
-            AbstractCapability capability) {
+        if (brandNew) {
+            this.dataTimes.add(dataTime);
+            Collections.sort(this.dataTimes);
+        }
+        records.add(obj);
     }
 
     @Override
     public String getName() {
-        return this.resourceName;
+        return "SPC Convective Outlook";
     }
-    
-	@Override
-	public void painted(AbstractVizResource<?, ?> resource) {
-		Interrogatable interrogatable = (Interrogatable) resource;
-        InterrogateMap dataMap = interrogatable.interrogate(
-                new ReferencedCoordinate(new Coordinate()), resource
-                        .getDescriptor().getTimeForResource(resource),
-                ISPCDataResource.SPC_RECORDS_INTERROGATE_KEY);
-        SPCRecord[] records = dataMap
-                .get(ISPCDataResource.SPC_RECORDS_INTERROGATE_KEY);
-        if (records != null) {
-            IDescriptor descriptor = resource.getDescriptor();
-            IRenderableDisplay display = descriptor.getRenderableDisplay();
-            IExtent filter = null;
-            if (display != null) {
-                filter = display.getExtent();
-            }
-            List<SPCRecord> visible = new ArrayList<SPCRecord>();
-            for (Object obj : records) {
-                SPCRecord record = (SPCRecord) obj;
-                boolean add = true;
-                if (filter != null) {
-                    Coordinate location = record.getGeometry().getCoordinate();
-                    double[] pixel = descriptor.worldToPixel(new double[] {
-                            location.x, location.y });
-                    add = filter.contains(pixel);
-                }
-                if (add == true) {
-                    visible.add(record);
-                }
-            }
 
-            //this.resourceName = "Air Quality Index (" + valueToText(meanValue) + " avg)";
-        }
+    @Override
+    public void project(CoordinateReferenceSystem crs) throws VizException {
+    }
 
-	}
+    @Override
+    public void remove(DataTime time) {
+    }
+
 }

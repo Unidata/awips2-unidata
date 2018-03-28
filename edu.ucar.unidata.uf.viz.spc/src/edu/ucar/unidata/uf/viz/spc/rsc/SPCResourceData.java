@@ -21,13 +21,6 @@ import com.raytheon.uf.viz.core.rsc.LoadProperties;
 @XmlAccessorType(XmlAccessType.NONE)
 public class SPCResourceData extends AbstractRequestableResourceData {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.raytheon.uf.viz.core.rsc.AbstractRequestableResourceData#
-     * constructResource(com.raytheon.uf.viz.core.rsc.LoadProperties,
-     * com.raytheon.uf.viz.core.rsc.PluginDataObject[])
-     */
     @Override
     protected AbstractVizResource<?, ?> constructResource(
             LoadProperties loadProperties, PluginDataObject[] objects)
