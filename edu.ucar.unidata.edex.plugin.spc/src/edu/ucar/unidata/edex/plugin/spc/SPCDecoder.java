@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.joda.time.DateTime;
 
 import com.raytheon.uf.common.dataplugin.PluginDataObject;
@@ -13,7 +12,6 @@ import com.raytheon.uf.common.status.UFStatus;
 import com.raytheon.uf.common.time.DataTime;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-import de.micromata.opengis.kml.v_2_2_0.Boundary;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Feature;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
@@ -34,13 +32,14 @@ import edu.ucar.unidata.common.dataplugin.spc.SPCRecord;
  * 
  * SOFTWARE HISTORY
  * 
- * Date         Ticket#    Engineer    Description
- * ------------ ---------- ----------- --------------------------
- * Mar 27, 2018            mjames@ucar Initial creation
+ * Date         Engineer    Description
+ * ------------ ----------- --------------------------
+ * Mar 27, 2018 mjames      Initial creation
+ * Mar 29, 2018 mjames      Smoothing by coordinate sampling
  * 
  * </pre>
  *
- * @author mjames
+ * @author mjames@ucar.edu
  */
 
 public class SPCDecoder {
@@ -72,55 +71,39 @@ public class SPCDecoder {
 	
 					Folder folder = (Folder) feature;
 					List<Feature> placemarkList = folder.getFeature();
-					int i = 0;
+					int reportCount = 0;
 					for (Feature mark : placemarkList ) {
-						i++;
+						
+						reportCount++;
 						Placemark placemark = (Placemark) mark;
 						String category = placemark.getName();
 						Geometry geometry = placemark.getGeometry();
+						
 						if(geometry instanceof Polygon) {
+							
 							Polygon polygon = (Polygon) geometry;
 							
-							Boundary outerBoundaryIs = polygon.getOuterBoundaryIs();
-							if(outerBoundaryIs != null) {
-								LinearRing linearRing = outerBoundaryIs.getLinearRing();
-								if(linearRing != null) {
-									List<de.micromata.opengis.kml.v_2_2_0.Coordinate> coordinates = linearRing.getCoordinates();
-									if(coordinates != null) {
-										TimeSpan timePrimitive = (TimeSpan) placemark.getTimePrimitive();
-										String dateString = timePrimitive.getBegin();
-										Date date = new DateTime(dateString).toDate();
-										DataTime dataTime = new DataTime(date);
-										try {
-											SPCRecord record = new SPCRecord();
-											record.setReportName(category);
-											com.vividsolutions.jts.geom.LinearRing outer = 
-													modifyLinearRing(polygon.getOuterBoundaryIs().getLinearRing());
-											List<Boundary> bound = polygon.getInnerBoundaryIs();
-											int j = 0;
-											com.vividsolutions.jts.geom.LinearRing[] inner = 
-													new com.vividsolutions.jts.geom.LinearRing[bound.size()];
-											for (Boundary b : bound) {
-												inner[j] = modifyLinearRing(b.getLinearRing());
-												j++;
-											}
-											
-											record.setGeometry(geomFact.createPolygon(outer, inner));
-											record.setDataTime(dataTime);
-											record.setPart(i);
-											list.add(record);
-										} catch (Exception ex) {
-											ex.printStackTrace();
-										}
-									}
-								}
+							TimeSpan timePrimitive = (TimeSpan) placemark.getTimePrimitive();
+							String dateString = timePrimitive.getBegin();
+							Date date = new DateTime(dateString).toDate();
+							DataTime dataTime = new DataTime(date);
+							
+							try {
+								SPCRecord record = new SPCRecord();
+								record.setDataTime(dataTime);
+								record.setReportName(category);
+								record.setPart(reportCount);
+								record.setGeometry(geomFact.createPolygon(
+										modifyLinearRing(polygon.getOuterBoundaryIs().getLinearRing())));
+								list.add(record);
+							} catch (Exception ex) {
+								ex.printStackTrace();
 							}
 						}
 					}
 					logger.info(placemarkList.size() + " polygons processed for KML feature " + folderName.toString() );
 				}
-			} 
-		
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -133,16 +116,45 @@ public class SPCDecoder {
 		return geomFact.createLinearRing(this.convertCoords(l.getCoordinates()));
 	}
 	
+	/**
+	 * 
+	 * Convert Coordinate list from KML to JTS
+	 * 
+	 * @param geomList
+	 * @return
+	 */
 	public com.vividsolutions.jts.geom.Coordinate[] convertCoords(List<Coordinate> geomList) {
-		com.vividsolutions.jts.geom.Coordinate[] coordList = new com.vividsolutions.jts.geom.Coordinate[geomList.size()];
-		int j = 0;
-		for (Coordinate i : geomList) {
-			com.vividsolutions.jts.geom.Coordinate b = new com.vividsolutions.jts.geom.Coordinate();
-			b.x = i.getLongitude();
-			b.y = i.getLatitude();
-			coordList[j] = b;
-			j = j + 1;
+
+		if (geomList.size() > 40) {
+			
+			// Downsample if large
+			int inc = 4;
+			int limit = Math.round(geomList.size()/inc);
+			com.vividsolutions.jts.geom.Coordinate[] coordList = new com.vividsolutions.jts.geom.Coordinate[limit];
+			for (int i = 0; i < coordList.length; i++) {
+				com.vividsolutions.jts.geom.Coordinate b = new com.vividsolutions.jts.geom.Coordinate();
+				b.x = geomList.get(i*inc).getLongitude();
+				b.y = geomList.get(i*inc).getLatitude();
+				coordList[i] = b;
+			}
+			// Ensure last coordinates are equal for a valid closed LinearRing
+			coordList[coordList.length-1].x = geomList.get(geomList.size()-1).getLongitude();
+			coordList[coordList.length-1].y = geomList.get(geomList.size()-1).getLatitude();
+			return coordList;
+			
+		} else {
+			
+			int j = 0;
+			com.vividsolutions.jts.geom.Coordinate[] coordList = new com.vividsolutions.jts.geom.Coordinate[geomList.size()];
+			for (Coordinate i : geomList) {
+				com.vividsolutions.jts.geom.Coordinate b = new com.vividsolutions.jts.geom.Coordinate();
+				b.x = i.getLongitude();
+				b.y = i.getLatitude();
+				coordList[j] = b;
+				j = j + 1;
+			}
+			return coordList;
+			
 		}
-		return coordList;
 	}
 }
