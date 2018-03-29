@@ -49,7 +49,7 @@ public class SPCRecord extends PluginDataObject {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String[] tornadoCategory = {
+	public static final String[] TORNADO_OUTLOOK = {
 			"2 %",
 			"5 %",
 			"10 %",
@@ -60,7 +60,7 @@ public class SPCRecord extends PluginDataObject {
 			"Sig"
 	};
 	
-	private static final String[] windCategory = {
+	public static final String[] HAILWIND_OUTLOOK = {
 			"5 %",
 			"15 %",
 			"30 %",
@@ -68,17 +68,8 @@ public class SPCRecord extends PluginDataObject {
 			"60 %",
 			"Sig"
 	};
-	
-	private static final String[] hailCategory = {
-			"5 %",
-			"15 %",
-			"30 %",
-			"45 %",
-			"60 %",
-			"Sig"
-	};
-	
-	private static final String[] tstormCategory = {
+		
+	public static final String[] TSTORM_OUTLOOK = {
 			"10 %",
 			"40 %",
 			"70 %"
@@ -102,7 +93,7 @@ public class SPCRecord extends PluginDataObject {
 			"High Risk"
 	};
 	
-	public static Map<String, String> CONVECTIVE_OUTLOOKS = 
+	public static Map<String, String> CONVECTIVE_OUTLOOK = 
 			mapDefinitions(convectiveCategory, convectiveCategoryName);
 
 	public static final String PLUGIN_NAME = "spc";

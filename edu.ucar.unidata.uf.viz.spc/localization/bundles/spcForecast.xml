@@ -16,7 +16,7 @@
 	                        </mapping>
                             <mapping key="reportType">
                                 <constraint
-                                    constraintValue="Convective Outlook"
+                                    constraintValue="${report}"
                                     constraintType="EQUALS" />
                             </mapping>
 	                    </metadataMap>

@@ -61,42 +61,73 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 
 	GeometryFactory geomFact = new GeometryFactory();
 
-	private Map<String, RGB> MAPPING = getColorMapping();
+	private Map<String, RGB> CONVECTIVE_MAPPING = getColorMapping(convectiveFillColor,SPCRecord.CONVECTIVE_OUTLOOK);
+	private Map<String, RGB> TORNADO_MAPPING = getColorMapping(tornadoFillColor,SPCRecord.TORNADO_OUTLOOK);
+	private Map<String, RGB> WINDHAIL_MAPPING = getColorMapping(windHailFillColor,SPCRecord.HAILWIND_OUTLOOK);
 
-	private static final RGB[] categoryFillColor = { 
+	private static Map<String, RGB> getColorMapping(RGB[] fillColor, Map<String, String> records) {
+		Map<String, RGB> mapping = new LinkedHashMap<>();
+		int i=0;
+		for (String name : records.values() ) {
+			mapping.put(name, fillColor[i]);
+			i++;
+		}
+		return mapping;
+	}
+	private static Map<String, RGB> getColorMapping(RGB[] fillColor, String[] records) {
+		Map<String, RGB> mapping = new LinkedHashMap<>();
+		int i=0;
+		for (String name : records ) {
+			mapping.put(name, fillColor[i]);
+			i++;
+		}
+		return mapping;
+	}
+
+	private static final RGB[] tornadoFillColor = { 
+			new RGB(0, 139, 0), 
+			new RGB(139, 71, 38), 
+			new RGB(255, 200, 0), 
+			new RGB(255, 0, 0), 
+			new RGB(255, 0, 255), 
+			new RGB(145, 44, 238), 
+			new RGB(16, 78, 139), 
+			new RGB(0, 0, 0)
+	};
+	
+	private static final RGB[] windHailFillColor = { 
+			new RGB(139, 71, 38), 
+			new RGB(255, 200, 0), 
+			new RGB(255, 0, 0), 
+			new RGB(255, 0, 255), 
+			new RGB(145, 44, 238), 
+			new RGB(0, 0, 0)
+	};
+
+	private static final RGB[] convectiveFillColor = { 
 			new RGB(192, 232, 192), 
 			new RGB(127, 197, 127), 
 			new RGB(246, 246, 127), 
 			new RGB(230, 194, 127), 
 			new RGB(230, 127, 127), 
-			new RGB(255, 127, 255), 
+			new RGB(255, 127, 255)
 	};
 
-	private static final RGB[] categoryLineColor = { 
+	private static final RGB[] convectiveLineColor = { 
 			new RGB(255, 255, 255), 
 			new RGB(60, 120, 60), 
 			new RGB(255, 150, 0), 
 			new RGB(215, 150, 60), 
 			new RGB(150, 25, 0), 
-			new RGB(200, 60, 150), 
+			new RGB(200, 60, 150)
 	};
 
-	public static RGB[] getCategoryfillcolor() {
-		return categoryFillColor;
+	public static RGB[] getConvectivefillcolor() {
+		return convectiveFillColor;
 	}
 
-	public static RGB[] getCategorylinecolor() {
-		return categoryLineColor;
-	}
-
-	private static Map<String, RGB> getColorMapping() {
-		Map<String, RGB> mapping = new LinkedHashMap<>();
-		int i=0;
-		for (String name : SPCRecord.CONVECTIVE_OUTLOOKS.values() ) {
-			mapping.put(name, categoryFillColor[i]);
-			i++;
-		}
-		return mapping;
+	public static RGB[] getConvectivelinecolor() {
+		return convectiveLineColor;
 	}
 
 	private Map<DataTime, Collection<SPCRecord>> unprocessedRecords = new HashMap<DataTime, Collection<SPCRecord>>();
@@ -202,12 +233,32 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 		
 		Geometry geom = record.getGeometry();
 		RGB color = getCapability(ColorableCapability.class).getColor();
-		for (Entry<String, RGB> entry : MAPPING.entrySet()) {
-			if (entry.getKey().equals(record.getTypeCategory())) {
-				color = entry.getValue();
-				break;
-			}
+		
+		switch(record.getReportType()) {
+			case("Convective Outlook"):
+				for (Entry<String, RGB> entry : CONVECTIVE_MAPPING.entrySet()) {
+					if (entry.getKey().equals(record.getTypeCategory())) {
+						color = entry.getValue();
+						break;
+					}
+				}
+			case("Tornado Outlook"):
+				for (Entry<String, RGB> entry : TORNADO_MAPPING.entrySet()) {
+					if (entry.getKey().equals(record.getTypeCategory())) {
+						color = entry.getValue();
+						break;
+					}
+				}
+			case("Wind Outlook"):
+			case("Hail Outlook"):
+				for (Entry<String, RGB> entry : WINDHAIL_MAPPING.entrySet()) {
+					if (entry.getKey().equals(record.getTypeCategory())) {
+						color = entry.getValue();
+						break;
+					}
+				}
 		}
+		
 		
 		return computeShape(target, descriptor, geom, color);
 		
@@ -266,7 +317,7 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 
 	@Override
 	public String getName() {
-		return "SPC Convective Outlook";
+		return "SPC " + this.resourceData.getMetadataMap().get("reportType").getConstraintValue();
 	}
 
 	@Override
