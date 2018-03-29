@@ -179,12 +179,55 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 			newRecords = unprocessedRecords.get(this.displayedDataTime);
 		}
 		for (SPCRecord record : newRecords) {
+			Polygon polygon = (Polygon) record.getGeometry();
 			RGB color = getReportTypeColor(record);
-			IShadedShape shadedShape = prepareShadedShape(record, target, color);
-			IWireframeShape wireFrame = prepareWireframeShape(record, target, color);
+			IShadedShape shadedShape = computeShape(target, descriptor, polygon, color);
+			IWireframeShape wireFrame = computeWireframe(target, descriptor, polygon, color);
 			target.drawWireframeShape(wireFrame, color, 6.0f, null, 1.0f);
 			target.drawShadedShape(shadedShape, 0.5f, 1.0f);
 		}
+	}
+
+	/**
+	 * 
+	 * @param target
+	 * @param descriptor
+	 * @param g
+	 * @param color
+	 * @return
+	 */
+	private IWireframeShape computeWireframe(IGraphicsTarget target, 
+			IMapDescriptor descriptor, Polygon p, RGB color) {
+		GeneralGridGeometry genGrid = descriptor.getGridGeometry();
+		IWireframeShape wireframe = target.createWireframeShape(false, new GeneralGridGeometry(genGrid));
+		wireframe.addLineSegment(p.getCoordinates());
+		return wireframe;
+	}
+	
+	/**
+	 * create shaded shape and compile to JTS
+	 * 
+	 * @param target
+	 * @param descriptor
+	 * @param g
+	 * @param color
+	 * @return
+	 */
+	private IShadedShape computeShape(IGraphicsTarget target, 
+			IMapDescriptor descriptor, Polygon p, RGB color) {
+		GeneralGridGeometry genGrid = descriptor.getGridGeometry();
+		IShadedShape newShadedShape = target.createShadedShape(false, new GeneralGridGeometry(genGrid));
+		JTSCompiler shapeCompiler = new JTSCompiler(newShadedShape, null, descriptor);
+		JTSGeometryData geomData = shapeCompiler.createGeometryData();
+		geomData.setWorldWrapCorrect(true);
+		try {
+			geomData.setGeometryColor(color);
+			shapeCompiler.handle(p, geomData);
+		} catch (VizException e) {
+			statusHandler.handle(Priority.PROBLEM, "Error computing shaded shape", e);
+		}
+		newShadedShape.compile();
+		return newShadedShape;
 	}
 
 	/**
@@ -215,76 +258,6 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 		return color;
 	}
 	
-	/**
-	 * prepare geometry and category color for a record.
-	 * 
-	 * @param record
-	 * @param target
-	 * @return
-	 * @throws VizException
-	 */
-	private IShadedShape prepareShadedShape(SPCRecord record, IGraphicsTarget target, RGB color)
-			throws VizException {
-		
-		Coordinate[] coords = record.getGeometry().getCoordinates();
-		int y=0;
-		for (Coordinate co : coords) {
-			y++;
-			if((y%2)==0) {
-				coords = (Coordinate[]) ArrayUtils.removeElement(coords, co);
-			}
-		}
-		Geometry geom = record.getGeometry();
-		return computeShape(target, descriptor, geom, color);
-	}
-	
-	private IWireframeShape prepareWireframeShape(SPCRecord record, IGraphicsTarget target, RGB color)
-			throws VizException {
-		Coordinate[] coords = record.getGeometry().getCoordinates();
-		int y=0;
-		for (Coordinate co : coords) {
-			y++;if((y%2)==0) {
-				coords = (Coordinate[]) ArrayUtils.removeElement(coords, co);}}
-		Geometry geom = record.getGeometry();
-		return computeWireframe(target, descriptor, geom, color);
-	}
-
-	private IWireframeShape computeWireframe(IGraphicsTarget target, 
-			IMapDescriptor descriptor, Geometry g, RGB color) {
-		Polygon polygon = (Polygon) g;
-		GeneralGridGeometry genGrid = descriptor.getGridGeometry();
-		IWireframeShape wireframe = target.createWireframeShape(false, new GeneralGridGeometry(genGrid));
-		wireframe.addLineSegment(polygon.getCoordinates());
-		return wireframe;
-	}
-	
-	/**
-	 * create shaded shape and compile to JTS
-	 * 
-	 * @param target
-	 * @param descriptor
-	 * @param g
-	 * @param color
-	 * @return
-	 */
-	private IShadedShape computeShape(IGraphicsTarget target, 
-			IMapDescriptor descriptor, Geometry g, RGB color) {
-		Polygon polygon = (Polygon) g;
-		GeneralGridGeometry genGrid = descriptor.getGridGeometry();
-		IShadedShape newShadedShape = target.createShadedShape(false, new GeneralGridGeometry(genGrid));
-		JTSCompiler shapeCompiler = new JTSCompiler(newShadedShape, null, descriptor);
-		JTSGeometryData geomData = shapeCompiler.createGeometryData();
-		geomData.setWorldWrapCorrect(true);
-		try {
-			geomData.setGeometryColor(color);
-			shapeCompiler.handle(polygon, geomData);
-		} catch (VizException e) {
-			statusHandler.handle(Priority.PROBLEM, "Error computing shaded shape", e);
-		}
-		newShadedShape.compile();
-		return newShadedShape;
-	}
-
 	/**
 	 * Add a new record to this resource
 	 * 
