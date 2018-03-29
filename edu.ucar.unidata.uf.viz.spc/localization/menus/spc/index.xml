@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <menuContributionFile>
-    <include installTo="menu:radar" 
+    <include installTo="menu:ncepHydro?before=SPC" 
              fileName="menus/spc/spc.xml"/>
 </menuContributionFile>

@@ -5,7 +5,13 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         		<descriptor xsi:type="mapDescriptor">
                 <resource>
-                    <loadProperties />
+                    <loadProperties loadWithoutData="false">
+                        <resourceType>PLAN_VIEW</resourceType>
+                        <capabilities>
+                            <capability xsi:type="colorableCapability" colorAsString="#ffffff"/>
+                            <capability xsi:type="outlineCapability" outlineWidth="2" outlineOn="true" lineStyle="SOLID"/>
+                        </capabilities>
+                    </loadProperties>
                     <properties isSystemResource="false" isBlinking="false" isMapLayer="false" isHoverOn="false" isVisible="true">
                     </properties>
                     <resourceData xsi:type="spcResourceData" >
@@ -22,6 +28,32 @@
 	                    </metadataMap>
 	                </resourceData>
 	            	</resource>
+	            	<!-- 
+	            	<resource>
+               		<loadProperties loadWithoutData="true">
+                        <resourceType>PLAN_VIEW</resourceType>
+                        <capabilities>
+                            <capability xsi:type="colorableCapability" colorAsString="#ffffff"/>
+                            <capability xsi:type="outlineCapability" outlineWidth="3" outlineOn="true" lineStyle="SOLID"/>
+                        </capabilities>
+               		</loadProperties>
+					<properties isSystemResource="false"
+						isBlinking="false" isMapLayer="false" isHoverOn="false"
+						isVisible="true" />
+					<resourceData xsi:type="redbookResourceData"
+						isUpdatingOnMetadataOnly="false" isRequeryNecessaryOnTimeMatch="true">
+						<metadataMap>
+							<mapping key="wmoTTAAii">
+								<constraint constraintValue="PGWE46"
+									constraintType="IN" />
+							</mapping>
+							<mapping key="pluginName">
+								<constraint constraintValue="redbook" constraintType="EQUALS" />
+							</mapping>
+						</metadataMap>
+					</resourceData>
+				</resource>
+				-->
 			</descriptor>
 		</displays>
 	</displayList>               

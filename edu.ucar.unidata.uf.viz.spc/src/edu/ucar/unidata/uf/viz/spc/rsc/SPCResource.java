@@ -317,7 +317,8 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 
 	@Override
 	public String getName() {
-		return "SPC " + this.resourceData.getMetadataMap().get("reportType").getConstraintValue();
+		return this.resourceData.getMetadataMap()
+		.get("reportType").getConstraintValue().toString().trim();
 	}
 
 	@Override
