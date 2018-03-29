@@ -96,21 +96,8 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 			new RGB(255, 127, 255)
 	};
 
-	private static final RGB[] convectiveLineColor = { 
-			new RGB(255, 255, 255), 
-			new RGB(60, 120, 60), 
-			new RGB(255, 150, 0), 
-			new RGB(215, 150, 60), 
-			new RGB(150, 25, 0), 
-			new RGB(200, 60, 150)
-	};
-
 	public static RGB[] getConvectiveFillColor() {
 		return convectiveFillColor;
-	}
-
-	public static RGB[] getConvectiveLineColor() {
-		return convectiveLineColor;
 	}
 
 	private Map<DataTime, Collection<SPCRecord>> unprocessedRecords = new HashMap<DataTime, Collection<SPCRecord>>();
@@ -195,8 +182,7 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 			RGB color = getReportTypeColor(record);
 			IShadedShape shadedShape = prepareShadedShape(record, target, color);
 			IWireframeShape wireFrame = prepareWireframeShape(record, target, color);
-			//target.drawWireframeShape(wireFrame, color, 4.0f);
-			target.drawWireframeShape(wireFrame, color, 4.0f, null, 1.0f);
+			target.drawWireframeShape(wireFrame, color, 6.0f, null, 1.0f);
 			target.drawShadedShape(shadedShape, 0.5f, 1.0f);
 		}
 	}
