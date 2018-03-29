@@ -11,8 +11,14 @@
                     <resourceData xsi:type="spcResourceData" >
 	                    <metadataMap>
 	                        <mapping key="pluginName">
-	                            <constraint constraintValue="spc"/>
+	                            <constraint constraintValue="spc"
+                                    constraintType="EQUALS" />
 	                        </mapping>
+                            <mapping key="reportType">
+                                <constraint
+                                    constraintValue="Convective Outlook"
+                                    constraintType="EQUALS" />
+                            </mapping>
 	                    </metadataMap>
 	                </resourceData>
 	            	</resource>

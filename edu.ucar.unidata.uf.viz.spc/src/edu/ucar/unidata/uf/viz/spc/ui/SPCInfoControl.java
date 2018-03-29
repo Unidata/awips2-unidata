@@ -24,7 +24,6 @@ import com.raytheon.uf.viz.core.rsc.interrogation.InterrogateMap;
 import com.vividsolutions.jts.geom.Coordinate;
 
 import edu.ucar.unidata.common.dataplugin.spc.SPCRecord;
-import edu.ucar.unidata.uf.viz.spc.ISPCDataResource;
 
 /**
  * SOFTWARE HISTORY
@@ -69,34 +68,33 @@ public class SPCInfoControl implements IPaintListener {
     @Override
     public void painted(AbstractVizResource<?, ?> resource) {
         Interrogatable interrogatable = (Interrogatable) resource;
-        InterrogateMap dataMap = interrogatable.interrogate(
-                new ReferencedCoordinate(new Coordinate()), resource
-                        .getDescriptor().getTimeForResource(resource),
-                ISPCDataResource.SPC_RECORDS_INTERROGATE_KEY);
-        SPCRecord[] records = dataMap
-                .get(ISPCDataResource.SPC_RECORDS_INTERROGATE_KEY);
-        if (records != null) {
-            IDescriptor descriptor = resource.getDescriptor();
-            IRenderableDisplay display = descriptor.getRenderableDisplay();
-            IExtent filter = null;
-            if (display != null) {
-                filter = display.getExtent();
-            }
-            List<SPCRecord> visible = new ArrayList<SPCRecord>();
-            for (Object obj : records) {
-                SPCRecord record = (SPCRecord) obj;
-                boolean add = true;
-                if (filter != null) {
-                    Coordinate location = record.getGeometry().getCoordinate();
-                    double[] pixel = descriptor.worldToPixel(new double[] {
-                            location.x, location.y });
-                    add = filter.contains(pixel);
-                }
-                if (add == true) {
-                    visible.add(record);
-                }
-            }
-        }
+//        InterrogateMap dataMap = interrogatable.interrogate(
+//                new ReferencedCoordinate(new Coordinate()), resource
+//                        .getDescriptor().getTimeForResource(resource),ISPCDataResource.SPC_RECORDS_INTERROGATE_KEY);
+//        SPCRecord[] records = dataMap
+//                .get(ISPCDataResource.SPC_RECORDS_INTERROGATE_KEY);
+//        if (records != null) {
+//            IDescriptor descriptor = resource.getDescriptor();
+//            IRenderableDisplay display = descriptor.getRenderableDisplay();
+//            IExtent filter = null;
+//            if (display != null) {
+//                filter = display.getExtent();
+//            }
+//            List<SPCRecord> visible = new ArrayList<SPCRecord>();
+//            for (Object obj : records) {
+//                SPCRecord record = (SPCRecord) obj;
+//                boolean add = true;
+//                if (filter != null) {
+//                    Coordinate location = record.getGeometry().getCoordinate();
+//                    double[] pixel = descriptor.worldToPixel(new double[] {
+//                            location.x, location.y });
+//                    add = filter.contains(pixel);
+//                }
+//                if (add == true) {
+//                    visible.add(record);
+//                }
+//            }
+//        }
     }
 
 }
