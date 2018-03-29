@@ -25,6 +25,7 @@ import com.raytheon.uf.common.status.UFStatus.Priority;
 import com.raytheon.uf.common.time.DataTime;
 import com.raytheon.uf.viz.core.IGraphicsTarget;
 import com.raytheon.uf.viz.core.drawables.IShadedShape;
+import com.raytheon.uf.viz.core.drawables.IWireframeShape;
 import com.raytheon.uf.viz.core.drawables.PaintProperties;
 import com.raytheon.uf.viz.core.exception.VizException;
 import com.raytheon.uf.viz.core.map.IMapDescriptor;
@@ -53,8 +54,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * @author mjames@ucar
  */
 
-public class SPCResource extends
-AbstractVizResource<SPCResourceData, MapDescriptor> {
+public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescriptor> {
 
 	private static final transient IUFStatusHandler statusHandler = UFStatus
 			.getHandler(SPCResource.class);
@@ -62,27 +62,10 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 	GeometryFactory geomFact = new GeometryFactory();
 
 	private Map<String, RGB> CONVECTIVE_MAPPING = getColorMapping(convectiveFillColor,SPCRecord.CONVECTIVE_OUTLOOK);
+	
 	private Map<String, RGB> TORNADO_MAPPING = getColorMapping(tornadoFillColor,SPCRecord.TORNADO_OUTLOOK);
+	
 	private Map<String, RGB> WINDHAIL_MAPPING = getColorMapping(windHailFillColor,SPCRecord.HAILWIND_OUTLOOK);
-
-	private static Map<String, RGB> getColorMapping(RGB[] fillColor, Map<String, String> records) {
-		Map<String, RGB> mapping = new LinkedHashMap<>();
-		int i=0;
-		for (String name : records.values() ) {
-			mapping.put(name, fillColor[i]);
-			i++;
-		}
-		return mapping;
-	}
-	private static Map<String, RGB> getColorMapping(RGB[] fillColor, String[] records) {
-		Map<String, RGB> mapping = new LinkedHashMap<>();
-		int i=0;
-		for (String name : records ) {
-			mapping.put(name, fillColor[i]);
-			i++;
-		}
-		return mapping;
-	}
 
 	private static final RGB[] tornadoFillColor = { 
 			new RGB(0, 139, 0), 
@@ -122,11 +105,11 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 			new RGB(200, 60, 150)
 	};
 
-	public static RGB[] getConvectivefillcolor() {
+	public static RGB[] getConvectiveFillColor() {
 		return convectiveFillColor;
 	}
 
-	public static RGB[] getConvectivelinecolor() {
+	public static RGB[] getConvectiveLineColor() {
 		return convectiveLineColor;
 	}
 
@@ -154,6 +137,7 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 		});
 		this.dataTimes = new ArrayList<DataTime>();
 	}
+	
 
 	@Override
 	protected void disposeInternal() {
@@ -166,6 +150,7 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 		}
 		return this.dataTimes.toArray(new DataTime[this.dataTimes.size()]);
 	}
+	
 
 	@Override
 	protected void initInternal(IGraphicsTarget target) throws VizException {
@@ -190,6 +175,7 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 		}
 	}
 	
+	
 	/**
 	 * process all records for the displayedDataTime
 	 * 
@@ -206,10 +192,43 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 			newRecords = unprocessedRecords.get(this.displayedDataTime);
 		}
 		for (SPCRecord record : newRecords) {
-			target.drawShadedShape(prepareGeometry(record, target), 0.5f, 1.0f);
+			RGB color = getReportTypeColor(record);
+			IShadedShape shadedShape = prepareShadedShape(record, target, color);
+			IWireframeShape wireFrame = prepareWireframeShape(record, target, color);
+			//target.drawWireframeShape(wireFrame, color, 4.0f);
+			target.drawWireframeShape(wireFrame, color, 4.0f, null, 1.0f);
+			target.drawShadedShape(shadedShape, 0.5f, 1.0f);
 		}
 	}
 
+	/**
+	 * 
+	 * @param reportType
+	 * @return
+	 */
+	private RGB getReportTypeColor(SPCRecord record) {
+		RGB color = getCapability(ColorableCapability.class).getColor();
+		switch(record.getReportType()) {
+			case("Convective Outlook"):
+				for (Entry<String, RGB> entry : CONVECTIVE_MAPPING.entrySet()) {
+					if (entry.getKey().equals(record.getTypeCategory())) {
+						color = entry.getValue();
+						break;}}
+			case("Tornado Outlook"):
+				for (Entry<String, RGB> entry : TORNADO_MAPPING.entrySet()) {
+					if (entry.getKey().equals(record.getTypeCategory())) {
+						color = entry.getValue();
+						break;}}
+			case("Wind Outlook"):
+			case("Hail Outlook"):
+				for (Entry<String, RGB> entry : WINDHAIL_MAPPING.entrySet()) {
+					if (entry.getKey().equals(record.getTypeCategory())) {
+						color = entry.getValue();
+						break;}}
+		}
+		return color;
+	}
+	
 	/**
 	 * prepare geometry and category color for a record.
 	 * 
@@ -218,11 +237,10 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 	 * @return
 	 * @throws VizException
 	 */
-	private IShadedShape prepareGeometry(SPCRecord record, IGraphicsTarget target)
+	private IShadedShape prepareShadedShape(SPCRecord record, IGraphicsTarget target, RGB color)
 			throws VizException {
 		
 		Coordinate[] coords = record.getGeometry().getCoordinates();
-		
 		int y=0;
 		for (Coordinate co : coords) {
 			y++;
@@ -230,40 +248,30 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 				coords = (Coordinate[]) ArrayUtils.removeElement(coords, co);
 			}
 		}
-		
 		Geometry geom = record.getGeometry();
-		RGB color = getCapability(ColorableCapability.class).getColor();
-		
-		switch(record.getReportType()) {
-			case("Convective Outlook"):
-				for (Entry<String, RGB> entry : CONVECTIVE_MAPPING.entrySet()) {
-					if (entry.getKey().equals(record.getTypeCategory())) {
-						color = entry.getValue();
-						break;
-					}
-				}
-			case("Tornado Outlook"):
-				for (Entry<String, RGB> entry : TORNADO_MAPPING.entrySet()) {
-					if (entry.getKey().equals(record.getTypeCategory())) {
-						color = entry.getValue();
-						break;
-					}
-				}
-			case("Wind Outlook"):
-			case("Hail Outlook"):
-				for (Entry<String, RGB> entry : WINDHAIL_MAPPING.entrySet()) {
-					if (entry.getKey().equals(record.getTypeCategory())) {
-						color = entry.getValue();
-						break;
-					}
-				}
-		}
-		
-		
 		return computeShape(target, descriptor, geom, color);
-		
+	}
+	
+	private IWireframeShape prepareWireframeShape(SPCRecord record, IGraphicsTarget target, RGB color)
+			throws VizException {
+		Coordinate[] coords = record.getGeometry().getCoordinates();
+		int y=0;
+		for (Coordinate co : coords) {
+			y++;if((y%2)==0) {
+				coords = (Coordinate[]) ArrayUtils.removeElement(coords, co);}}
+		Geometry geom = record.getGeometry();
+		return computeWireframe(target, descriptor, geom, color);
 	}
 
+	private IWireframeShape computeWireframe(IGraphicsTarget target, 
+			IMapDescriptor descriptor, Geometry g, RGB color) {
+		Polygon polygon = (Polygon) g;
+		GeneralGridGeometry genGrid = descriptor.getGridGeometry();
+		IWireframeShape wireframe = target.createWireframeShape(false, new GeneralGridGeometry(genGrid));
+		wireframe.addLineSegment(polygon.getCoordinates());
+		return wireframe;
+	}
+	
 	/**
 	 * create shaded shape and compile to JTS
 	 * 
@@ -317,7 +325,7 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 
 	@Override
 	public String getName() {
-		return this.resourceData.getMetadataMap()
+		return "SPC " + this.resourceData.getMetadataMap()
 		.get("reportType").getConstraintValue().toString().trim();
 	}
 
@@ -327,6 +335,38 @@ AbstractVizResource<SPCResourceData, MapDescriptor> {
 
 	@Override
 	public void remove(DataTime time) {
+	}
+	
+	/**
+	 * 
+	 * @param fillColor
+	 * @param records
+	 * @return
+	 */
+	private static Map<String, RGB> getColorMapping(RGB[] fillColor, Map<String, String> records) {
+		Map<String, RGB> mapping = new LinkedHashMap<>();
+		int i=0;
+		for (String name : records.values() ) {
+			mapping.put(name, fillColor[i]);
+			i++;
+		}
+		return mapping;
+	}
+
+	/**
+	 * 
+	 * @param fillColor
+	 * @param records
+	 * @return
+	 */
+	private static Map<String, RGB> getColorMapping(RGB[] fillColor, String[] records) {
+		Map<String, RGB> mapping = new LinkedHashMap<>();
+		int i=0;
+		for (String name : records ) {
+			mapping.put(name, fillColor[i]);
+			i++;
+		}
+		return mapping;
 	}
 
 }
