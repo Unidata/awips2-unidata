@@ -3,7 +3,12 @@ package edu.ucar.unidata.edex.plugin.spc;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.joda.time.DateTime;
 
 import com.raytheon.uf.common.dataplugin.PluginDataObject;
@@ -48,6 +53,23 @@ public class SPCDecoder {
 
 	private IUFStatusHandler logger = UFStatus.getHandler(SPCDecoder.class);    
 
+	private Map<String, String> reportType = SPCRecord.mapDefinitions(report, reportRegex);
+
+	private static final String[] report = { 
+			"Convective Outlook", 
+			"Tornado Outlook",
+			"Wind Outlook",
+			"Hail Outlook"
+			//,"Thunderstorm Outlook"
+	};
+	private static final String[] reportRegex = { 
+			"cat", 
+			"torn", 
+			"wind",
+			"hail"
+			//,"enh"
+	};
+	
 	public PluginDataObject[] decode(byte[] data) throws Exception {
 
 		ArrayList<SPCRecord> list = new ArrayList<SPCRecord>();
@@ -63,17 +85,23 @@ public class SPCDecoder {
 			List<Feature> folders = document.getFeature();
 	
 			for(Feature feature : folders) {
-				String folderName = feature.getName();
 				
-				// SPC categorical outlook
-				// TODO: probabalistic outlooks
-				if (feature instanceof Folder && folderName.endsWith("_cat")) {
-	
+				String folderName = feature.getName();
+				String type = null;
+				for (Entry<String, String> typ : reportType.entrySet()) {
+					if (folderName.endsWith(typ.getValue())) {
+						type = typ.getKey();
+						break;
+					}
+				}
+
+				if (feature instanceof Folder) {
+					
 					Folder folder = (Folder) feature;
 					List<Feature> placemarkList = folder.getFeature();
 					int reportCount = 0;
+					
 					for (Feature mark : placemarkList ) {
-						
 						reportCount++;
 						Placemark placemark = (Placemark) mark;
 						String category = placemark.getName();
@@ -91,8 +119,9 @@ public class SPCDecoder {
 							try {
 								SPCRecord record = new SPCRecord();
 								record.setDataTime(dataTime);
-								record.setReportName(category);
-								record.setPart(reportCount);
+								record.setTypeCategory(category);
+								record.setReportType(type);
+								record.setReportPart(reportCount);
 								record.setGeometry(geomFact.createPolygon(
 										modifyLinearRing(polygon.getOuterBoundaryIs().getLinearRing())));
 								list.add(record);
@@ -125,9 +154,9 @@ public class SPCDecoder {
 	 */
 	public com.vividsolutions.jts.geom.Coordinate[] convertCoords(List<Coordinate> geomList) {
 
-		if (geomList.size() > 40) {
+		if (1 == 0 && geomList.size() > 40) {
 			
-			// Downsample if large
+			// Downsample if large DISABLED
 			int inc = 4;
 			int limit = Math.round(geomList.size()/inc);
 			com.vividsolutions.jts.geom.Coordinate[] coordList = new com.vividsolutions.jts.geom.Coordinate[limit];
