@@ -8,7 +8,6 @@
                     <loadProperties loadWithoutData="false">
                         <resourceType>PLAN_VIEW</resourceType>
                         <capabilities>
-                            <capability xsi:type="colorableCapability" colorAsString="#ffffff"/>
                             <capability xsi:type="outlineCapability" outlineWidth="2" outlineOn="true" lineStyle="SOLID"/>
                         </capabilities>
                     </loadProperties>

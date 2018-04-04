@@ -10,20 +10,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.swt.graphics.RGB;
 import org.geotools.coverage.grid.GeneralGridGeometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.raytheon.uf.common.dataplugin.PluginDataObject;
 import edu.ucar.unidata.common.dataplugin.spc.SPCRecord;
-
 import com.raytheon.uf.common.geospatial.ReferencedCoordinate;
 import com.raytheon.uf.common.status.IUFStatusHandler;
 import com.raytheon.uf.common.status.UFStatus;
 import com.raytheon.uf.common.status.UFStatus.Priority;
 import com.raytheon.uf.common.time.DataTime;
+import com.raytheon.uf.viz.core.DrawableString;
 import com.raytheon.uf.viz.core.IGraphicsTarget;
+import com.raytheon.uf.viz.core.IGraphicsTarget.TextStyle;
+import com.raytheon.uf.viz.core.IGraphicsTarget.VerticalAlignment;
 import com.raytheon.uf.viz.core.drawables.IShadedShape;
 import com.raytheon.uf.viz.core.drawables.IWireframeShape;
 import com.raytheon.uf.viz.core.drawables.PaintProperties;
@@ -37,6 +38,7 @@ import com.raytheon.uf.viz.core.rsc.capabilities.ColorableCapability;
 import com.raytheon.viz.core.rsc.jts.JTSCompiler;
 import com.raytheon.viz.core.rsc.jts.JTSCompiler.JTSGeometryData;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
@@ -46,9 +48,10 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * SOFTWARE HISTORY
  * 
- * Date         Ticket#    Engineer    Description
- * ------------ ---------- ----------- --------------------------
- * Mar 28, 2018            mjames@ucar Initial creation
+ * Date         Engineer    Description
+ * ------------ ----------- --------------------------
+ * Mar 28, 2018 mjames      Initial creation
+ * Apr 04, 2018 mjames      Type/category labeling and sampling
  * 
  * 
  * @author mjames@ucar
@@ -61,11 +64,14 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 
 	GeometryFactory geomFact = new GeometryFactory();
 
-	private Map<String, RGB> CONVECTIVE_MAPPING = getColorMapping(convectiveFillColor,SPCRecord.CONVECTIVE_OUTLOOK);
+	private Map<String, RGB> CONVECTIVE_MAPPING = 
+			getColorMapping(convectiveFillColor,SPCRecord.CONVECTIVE_OUTLOOK);
 	
-	private Map<String, RGB> TORNADO_MAPPING = getColorMapping(tornadoFillColor,SPCRecord.TORNADO_OUTLOOK);
+	private Map<String, RGB> TORNADO_MAPPING = 
+			getColorMapping(tornadoFillColor,SPCRecord.TORNADO_OUTLOOK);
 	
-	private Map<String, RGB> WINDHAIL_MAPPING = getColorMapping(windHailFillColor,SPCRecord.HAILWIND_OUTLOOK);
+	private Map<String, RGB> WINDHAIL_MAPPING = 
+			getColorMapping(windHailFillColor,SPCRecord.HAILWIND_OUTLOOK);
 
 	private static final RGB[] tornadoFillColor = { 
 			new RGB(0, 139, 0), 
@@ -102,6 +108,8 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 
 	private Map<DataTime, Collection<SPCRecord>> unprocessedRecords = new HashMap<DataTime, Collection<SPCRecord>>();
 
+	Collection<SPCRecord> records = null;
+	
 	List<IShadedShape> shapeList = new ArrayList<IShadedShape>();
 
 	private DataTime displayedDataTime;
@@ -125,7 +133,6 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 		this.dataTimes = new ArrayList<DataTime>();
 	}
 	
-
 	@Override
 	protected void disposeInternal() {
 	}
@@ -137,7 +144,6 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 		}
 		return this.dataTimes.toArray(new DataTime[this.dataTimes.size()]);
 	}
-	
 
 	@Override
 	protected void initInternal(IGraphicsTarget target) throws VizException {
@@ -145,7 +151,23 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 
 	@Override
 	public String inspect(ReferencedCoordinate coord) throws VizException {
-		return null;
+        StringBuilder res = new StringBuilder();
+        for (SPCRecord record : records) {
+            try {
+                Geometry geom = record.getGeometry();
+                Coordinate latLon = coord.asLatLon();
+                Point point = geom.getFactory().createPoint(latLon);
+                if (geom.contains(point)) {
+                    String data = record.getTypeCategory();
+                    res.append(data);
+                    res.append("\n");
+                }
+                
+            } catch (Exception e) {
+                throw new VizException("Error interogating SPC geometry", e);
+            }
+        }
+        return res.toString();
 	}
 
 	@Override
@@ -162,9 +184,34 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 		}
 	}
 	
-	
+    /**
+     * Paint the text onto the target
+     * 
+     * @param record
+     * @param target
+     * @return 
+     * @throws VizException
+     */
+    private DrawableString paintText(SPCRecord record, IGraphicsTarget target)
+            throws VizException {
+    	
+        RGB color = getReportTypeColor(record);
+        String type = record.getTypeCategory();
+        
+        Point center = record.getGeometry().getEnvelope().getCentroid();
+        double[] pt = descriptor.worldToPixel(
+        		new double[] {center.getCoordinate().x, center.getCoordinate().y});
+        
+        DrawableString string = new DrawableString(type, color);
+        string.setCoordinates(pt[0], pt[1], pt[2]);
+        string.addTextStyle(TextStyle.BLANKED);
+        string.verticalAlignment = VerticalAlignment.MIDDLE;
+        
+        return string;
+    }
+
 	/**
-	 * process all records for the displayedDataTime
+	 * Process all records for the displayedDataTime
 	 * 
 	 * @param target
 	 * @param paintProps
@@ -178,21 +225,32 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 		synchronized (unprocessedRecords) {
 			newRecords = unprocessedRecords.get(this.displayedDataTime);
 		}
+		
 		for (SPCRecord record : newRecords) {
 			Polygon polygon = (Polygon) record.getGeometry();
+			
 			RGB color = getReportTypeColor(record);
+			double zoom = 12.-(descriptor.getRenderableDisplay().getZoom() * 100.);
+			if (zoom < 4) zoom = 4;
 			IShadedShape shadedShape = computeShape(target, descriptor, polygon, color);
 			IWireframeShape wireFrame = computeWireframe(target, descriptor, polygon, color);
-			target.drawWireframeShape(wireFrame, color, 6.0f, null, 1.0f);
-			target.drawShadedShape(shadedShape, 0.5f, 1.0f);
+			target.drawWireframeShape(wireFrame, color, (float) zoom, null, 0.7f);
+			target.drawShadedShape(shadedShape, 0.3f, 1.0f);
+			
 		}
+		for (SPCRecord record : newRecords) {
+			Polygon polygon = (Polygon) record.getGeometry();
+			if (polygon.getArea() >= 1.)	target.drawStrings(paintText(record, target));
+		}
+		
 	}
 
 	/**
+	 * Create wireframe object from Polygon
 	 * 
 	 * @param target
 	 * @param descriptor
-	 * @param g
+	 * @param p
 	 * @param color
 	 * @return
 	 */
@@ -200,16 +258,42 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 			IMapDescriptor descriptor, Polygon p, RGB color) {
 		GeneralGridGeometry genGrid = descriptor.getGridGeometry();
 		IWireframeShape wireframe = target.createWireframeShape(false, new GeneralGridGeometry(genGrid));
-		wireframe.addLineSegment(p.getCoordinates());
+		Coordinate[] coords = sampleCoordinates(p.getBoundary().getCoordinates());
+		wireframe.addLineSegment(coords);
 		return wireframe;
 	}
 	
 	/**
-	 * create shaded shape and compile to JTS
+	 * Downsample polygon coordinate list
+	 * 
+	 * @param coordinates
+	 * @return
+	 */
+	private Coordinate[] sampleCoordinates(Coordinate[] coordinates) {
+		if (coordinates.length > 10) {
+			double zoom = descriptor.getRenderableDisplay().getZoom() * 200.;
+			int inc = (int) zoom;
+			if (inc < 5) inc = 1;
+			if (inc > 5) inc = 10;
+			int limit = Math.round(coordinates.length/inc);
+			Coordinate[] coordList = new Coordinate[limit];
+			for (int i = 0; i < coordList.length; i++) {
+				coordList[i] = coordinates[i*inc];
+			}
+			// Ensure last coordinates are equal for a valid closed LinearRing
+			coordList[coordList.length-1] = coordList[0];
+			return coordList;
+		} else {
+			return coordinates;
+		}
+	}
+
+	/**
+	 * Create shaded shape and compile to JTS
 	 * 
 	 * @param target
 	 * @param descriptor
-	 * @param g
+	 * @param p
 	 * @param color
 	 * @return
 	 */
@@ -231,8 +315,9 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 	}
 
 	/**
+	 * Get color for report type
 	 * 
-	 * @param reportType
+	 * @param record
 	 * @return
 	 */
 	private RGB getReportTypeColor(SPCRecord record) {
@@ -265,7 +350,7 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 	 */
 	protected void addRecord(SPCRecord obj) {
 		DataTime dataTime = obj.getDataTime();
-		Collection<SPCRecord> records = null;
+		
 		boolean brandNew = false;
 		synchronized (unprocessedRecords) {
 			records = unprocessedRecords.get(dataTime);
@@ -297,6 +382,7 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 	}
 	
 	/**
+	 * Color mapping by report type
 	 * 
 	 * @param fillColor
 	 * @param records
@@ -305,7 +391,7 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 	private static Map<String, RGB> getColorMapping(RGB[] fillColor, Map<String, String> records) {
 		Map<String, RGB> mapping = new LinkedHashMap<>();
 		int i=0;
-		for (String name : records.values() ) {
+		for (String name : records.keySet() ) {
 			mapping.put(name, fillColor[i]);
 			i++;
 		}
@@ -313,6 +399,7 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 	}
 
 	/**
+	 * Color mapping by report type
 	 * 
 	 * @param fillColor
 	 * @param records

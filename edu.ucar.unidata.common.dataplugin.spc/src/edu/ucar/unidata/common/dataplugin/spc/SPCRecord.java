@@ -94,7 +94,7 @@ public class SPCRecord extends PluginDataObject {
 	};
 	
 	public static Map<String, String> CONVECTIVE_OUTLOOK = 
-			mapDefinitions(convectiveCategory, convectiveCategoryName);
+			mapDefinitions(convectiveCategoryName, convectiveCategory);
 
 	public static final String PLUGIN_NAME = "spc";
 
