@@ -46,8 +46,8 @@ public class USGSDecoder {
             		String height = values[6];
             		if (!cfs.equals(SEASONAL)) {
             			record.setName(name);
-                		record.setCfs(Double.parseDouble(cfs));
-                		record.setHeight(Double.parseDouble(height));
+                		record.setCfs(Float.parseFloat(cfs));
+                		record.setHeight(Float.parseFloat(height));
                 		record.setDataTime(new DataTime(new Date()));
                 		
                 		/*

@@ -37,11 +37,11 @@ public class USGSRecord extends PluginDataObject {
 
     @Column
     @DynamicSerializeElement
-    Double cfs;
+    Float cfs;
 
     @Column
     @DynamicSerializeElement
-    Double height;
+    Float height;
 
     @Column(name = "location", columnDefinition = "geometry")
     @Type(type = "org.hibernate.spatial.GeometryType")
@@ -60,19 +60,19 @@ public class USGSRecord extends PluginDataObject {
         this.name = name;
     }
 
-    public Double getCfs() {
+    public Float getCfs() {
         return cfs;
     }
 
-    public void setCfs(Double cfs) {
+    public void setCfs(Float cfs) {
         this.cfs = cfs;
     }
 
-    public Double getHeight() {
+    public Float getHeight() {
         return height;
     }
 
-    public void setHeight(Double height) {
+    public void setHeight(Float height) {
         this.height = height;
     }
 
