@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bundle>
+    <displayList>
+        <displays xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="d2DMapRenderableDisplay" magnification="1.0" density="1.0" scale="Equidistant Cylindrical" mapCenter="0.009000000000014226 -0.008999999999997475 0.0" zoomLevel="1.0">
+            <descriptor xsi:type="mapDescriptor">
+            	<resource>
+            		<loadProperties>
+						<capabilities>
+						</capabilities>
+					</loadProperties>
+            		<properties isSystemResource="false" isBlinking="false" isMapLayer="false" isHoverOn="false" isVisible="true">
+                    </properties>
+            		<resourceData xsi:type="usgsResourceData" isUpdatingOnMetadataOnly="false" isRequeryNecessaryOnTimeMatch="true">
+					<binOffset posOffset="1800" negOffset="1800" virtualOffset="0"/>
+            			<metadataMap>
+                            <mapping key="pluginName">
+                                <constraint constraintValue="usgs"/>
+                            </mapping>
+                        </metadataMap>
+            		</resourceData>
+            	</resource>
+			</descriptor>
+		</displays>
+	</displayList>               
+</bundle>

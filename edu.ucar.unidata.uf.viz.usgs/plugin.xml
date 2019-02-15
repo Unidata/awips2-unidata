@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+	<extension
+	      point="org.eclipse.ui.commands">
+	      <command
+	      	 name="Load USGS Resource"
+             id="edu.ucar.unidata.uf.viz.usgs.loadUSGSResource">
+	      </command>
+	</extension>
+	
+	<extension
+	      point="org.eclipse.ui.handlers">
+	      <handler
+             commandId="edu.ucar.unidata.uf.viz.usgs.loadUSGSResource"
+             class="edu.ucar.unidata.uf.viz.usgs.rsc.handler.USGSResourceLoader">
+	      </handler>
+	</extension>
+	
+	<extension
+	      point="org.eclipse.ui.menus">
+	      <menuContribution
+             locationURI="menu:radar">
+             <command
+                   label="USGS Resource"
+                   commandId="com.raytheon.uf.viz.ui.loadbundle">
+                   <parameter
+                   		 name="bundleFile"
+                         value="bundles/usgs/resource.xml">
+                   </parameter>
+             </command>
+	      </menuContribution>
+	</extension>
+	
+	<extension
+	      point="com.raytheon.viz.ui.contextualMenu">
+	    <contextualMenu
+	          actionClass="edu.ucar.unidata.uf.viz.usgs.ui.OpenUSGSInfoAction"
+	          capabilityInterface="edu.ucar.unidata.uf.viz.usgs.IUSGSDataResource"
+	          name="USGS info..."
+	          sortID="50">
+	    </contextualMenu>
+	</extension>
+	
+</plugin>
