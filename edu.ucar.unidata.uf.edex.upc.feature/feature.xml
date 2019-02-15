@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="edu.ucar.unidata.edex.feature"
+      id="edu.ucar.unidata.uf.edex.upc.feature"
       label="Unidata EDEX Feature"
       version="1.0.0.qualifier"
       provider-name="Unidata">
