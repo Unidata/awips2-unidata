@@ -1,0 +1,12 @@
+# Data-value qualification codes included in this output:
+#     P  Provisional data subject to revision.
+#     Ssn  Parameter monitored seasonally.
+#
+# Data provided for site 06719505
+agency_cd	site_no	datetime	tz_cd	210989_00060	210989_00060_cd	210988_00065	210988_00065_cd
+5s	15s	20d	6s	14n	10s	14n	10s
+USGS	06719505	2019-02-15 09:45	MST	35.4	P	3.55	P
+# Data provided for site 07091200
+agency_cd	site_no	datetime	tz_cd	211106_00060	211106_00060_cd	211105_00065	211105_00065_cd
+5s	15s	20d	6s	14n	10s	14n	10s
+USGS	07091200	2019-02-15 09:45	MST	Ssn	P	Ssn	P
