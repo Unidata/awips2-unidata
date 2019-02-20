@@ -3,27 +3,31 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd   
   http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-	<bean id="usgsDecoder" class="edu.ucar.unidata.edex.plugin.usgs.USGSDecoder"/>
+	<bean id="streamflowDecoder" class="edu.ucar.unidata.edex.plugin.usgs.StreamflowDecoder"/>
 
-    <bean id="usgsDistRegistry" factory-bean="distributionSrv" factory-method="register">
-		<constructor-arg ref="usgsPluginName" />
-		<constructor-arg value="jms-durable:queue:Ingest.Usgs" />
+	<bean id="streamflowPluginName" class="java.lang.String">
+		<constructor-arg type="java.lang.String" value="streamflow" />
+	</bean>
+
+	<bean id="streamflowDistRegistry" factory-bean="distributionSrv" factory-method="register">
+		<constructor-arg ref="streamflowPluginName" />
+		<constructor-arg value="jms-durable:queue:Ingest.Streamflow" />
 		<constructor-arg value="true" />
 	</bean>
 	
-	<camelContext id="usgs-camel"
+	<camelContext id="streamflow-camel"
 		xmlns="http://camel.apache.org/schema/spring"
 		errorHandlerRef="errorHandler">
 		
-		<route id="usgsIngestRoute">
-			<from uri="jms-durable:queue:Ingest.Usgs" />
+		<route id="streamflowIngestRoute">
+			<from uri="jms-durable:queue:Ingest.Streamflow" />
 			<setHeader headerName="pluginName">
-				<constant>usgs</constant>
+				<constant>streamflow</constant>
 			</setHeader>
 			<doTry>
 				<pipeline>
 					<bean ref="stringToFile" />
-					<bean ref="usgsDecoder" method="decode" />
+					<bean ref="streamflowDecoder" method="decode" />
 					<to uri="direct-vm:persistIndexAlert" />
 				</pipeline>
 				<doCatch>

@@ -8,7 +8,7 @@ import com.raytheon.uf.common.dataplugin.PluginDataObject;
 
 import edu.ucar.unidata.edex.plugin.usgs.StreamflowDecoder;
 
-public class USGSDecoderTest {
+public class WatermlDecoderTest {
 
     /**
      * @param args
@@ -16,7 +16,7 @@ public class USGSDecoderTest {
     public static void main(String[] args) {
         // TODO Auto-generated method stub
         try {
-            InputStream stream = USGSDecoderTest.class.getResourceAsStream("usgs.txt");
+            InputStream stream = WatermlDecoderTest.class.getResourceAsStream("usgs.txt");
             BufferedReader buf = new BufferedReader(new InputStreamReader(stream));
             String input = new String();
             String lineRead = null;
