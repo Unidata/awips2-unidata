@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <menuTemplate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<contribute xsi:type="bundleItem" file="bundles/usgs/resource.xml"
-		menuText="USGS Resource 2" id="usgs.resource" useReferenceTime="true">
+	<contribute xsi:type="bundleItem" file="bundles/streamgauge/streamgauge.xml"
+		menuText="Streamgauge Display" id="streamgauge.resource" useReferenceTime="true">
 	</contribute>
-</menuTemplate>
+</menuTemplate>s

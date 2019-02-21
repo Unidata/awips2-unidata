@@ -1,4 +1,4 @@
-package edu.ucar.unidata.uf.viz.usgs.rsc;
+package edu.ucar.unidata.uf.viz.streamgauge.rsc;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -48,12 +48,12 @@ import com.raytheon.uf.viz.core.rsc.interrogation.InterrogateMap;
 import com.raytheon.uf.viz.core.rsc.interrogation.InterrogationKey;
 import com.vividsolutions.jts.geom.Coordinate;
 
-import edu.ucar.unidata.common.dataplugin.usgs.USGSRecord;
-import edu.ucar.unidata.uf.viz.usgs.USGSRenderable;
-import edu.ucar.unidata.uf.viz.usgs.IUSGSDataResource;
+import edu.ucar.unidata.common.dataplugin.usgs.StreamflowRecord;
+import edu.ucar.unidata.uf.viz.streamgauge.StreamgaugeDataResource;
+import edu.ucar.unidata.uf.viz.streamgauge.StreamgaugeRenderable;
 
 /**
- * USGS Resource for displaying {@link USGSRecord}s
+ * Streamgauge Resource for displaying {@link StreamflowRecord}s
  * 
  * <pre>
  * 
@@ -69,28 +69,28 @@ import edu.ucar.unidata.uf.viz.usgs.IUSGSDataResource;
  * @version 1.0
  */
 
-public class USGSResource extends
-        AbstractPluginDataObjectResource<USGSResourceData, IMapDescriptor>
-        implements IUSGSDataResource, IPaintListener {
+public class StreamgaugeResource extends
+	AbstractPluginDataObjectResource<StreamgaugeResourceData, IMapDescriptor>
+		implements StreamgaugeDataResource, IPaintListener {
 
-	private String resourceName = "Air Quality Index";
+	private String resourceName = "River Gauge CFS";
 	private double meanValue;
-    private DecimalFormat format = new DecimalFormat("0.00");
+    private DecimalFormat format = new DecimalFormat("0.0");
 	
-    private class USGSGroupRenderable implements IRenderable {
+    private class StreamgaugeGroupRenderable implements IRenderable {
 
-        private List<USGSRenderable> renderables = new ArrayList<USGSRenderable>();
+        private List<StreamgaugeRenderable> renderables = new ArrayList<StreamgaugeRenderable>();
 
-        public USGSGroupRenderable(Collection<PluginDataObject> records) {
+        public StreamgaugeGroupRenderable(Collection<PluginDataObject> records) {
             for (PluginDataObject obj : records) {
-                if (obj instanceof USGSRecord) {
-                    addRecord((USGSRecord) obj);
+                if (obj instanceof StreamflowRecord) {
+                    addRecord((StreamflowRecord) obj);
                 }
             }
         }
 
-        public void addRecord(USGSRecord record) {
-            USGSRenderable renderable = new USGSRenderable(getDescriptor());
+        public void addRecord(StreamflowRecord record) {
+            StreamgaugeRenderable renderable = new StreamgaugeRenderable(getDescriptor());
             renderable.setRecord(record);
             renderables.add(renderable);
         }
@@ -102,17 +102,17 @@ public class USGSResource extends
             ColorMapParameters params = getCapability(ColorMapCapability.class)
                     .getColorMapParameters();
 
-            for (USGSRenderable renderable : renderables) {
+            for (StreamgaugeRenderable renderable : renderables) {
                 renderable.setColor(color);
                 renderable.setParameters(params);
                 renderable.paint(target, paintProps);
             }
         }
 
-        public Collection<USGSRecord> getRecords() {
-            List<USGSRecord> records = new ArrayList<USGSRecord>(
+        public Collection<StreamflowRecord> getRecords() {
+            List<StreamflowRecord> records = new ArrayList<StreamflowRecord>(
                     renderables.size());
-            for (USGSRenderable renderable : renderables) {
+            for (StreamgaugeRenderable renderable : renderables) {
                 records.add(renderable.getRecord());
             }
             return records;
@@ -123,7 +123,7 @@ public class USGSResource extends
      * @param resourceData
      * @param loadProperties
      */
-    protected USGSResource(USGSResourceData resourceData,
+    protected StreamgaugeResource(StreamgaugeResourceData resourceData,
             LoadProperties loadProperties, PluginDataObject[] pdos) {
         super(resourceData, loadProperties);
         addDataObject(pdos);
@@ -132,6 +132,7 @@ public class USGSResource extends
     @Override
     protected void initInternal(IGraphicsTarget target) throws VizException {
         super.initInternal(target);
+
         ColorMapParameters params = new ColorMapParameters();
 
         try {
@@ -145,41 +146,35 @@ public class USGSResource extends
         DataMappingEntry entry = new DataMappingEntry();
         entry.setDisplayValue(0.0);
         entry.setPixelValue(0.0);
-        entry.setSample("Good");
         preferences.addEntry(entry);
 
         entry = new DataMappingEntry();
-        entry.setDisplayValue(50.0);
+        entry.setDisplayValue(500.0);
         entry.setPixelValue(1.0);
-        entry.setSample("Moderate");
         preferences.addEntry(entry);
 
         entry = new DataMappingEntry();
-        entry.setDisplayValue(100.0);
+        entry.setDisplayValue(1000.0);
         entry.setPixelValue(2.0);
-        entry.setSample("Unhealthy (SG)");
         preferences.addEntry(entry);
 
         entry = new DataMappingEntry();
-        entry.setDisplayValue(150.0);
+        entry.setDisplayValue(1500.0);
         entry.setPixelValue(3.0);
-        entry.setSample("Unhealthy");
         preferences.addEntry(entry);
 
         entry = new DataMappingEntry();
-        entry.setDisplayValue(200.0);
+        entry.setDisplayValue(2000.0);
         entry.setPixelValue(4.0);
-        entry.setSample("Very Unhealthy");
         preferences.addEntry(entry);
 
         entry = new DataMappingEntry();
-        entry.setDisplayValue(300.0);
+        entry.setDisplayValue(2500.0);
         entry.setPixelValue(5.0);
-        entry.setSample("Hazardous");
         preferences.addEntry(entry);
 
         entry = new DataMappingEntry();
-        entry.setDisplayValue(400.0);
+        entry.setDisplayValue(3000.0);
         entry.setPixelValue(6.0);
         preferences.addEntry(entry);
 
@@ -191,75 +186,74 @@ public class USGSResource extends
         getCapability(ColorMapCapability.class).setColorMapParameters(params);
         
         registerListener(this);
-
+        
     }
-
+    
     @Override
-	protected void disposeResource() {
-		unregisterListener(this);
-		super.disposeResource();
-	}
-
-	@Override
-    protected DataTime getDataObjectTime(PluginDataObject pdo) {
-        BinOffset offset = resourceData.getBinOffset();
-        if (offset != null) {
-            return offset.getNormalizedTime(super.getDataObjectTime(pdo));
-        }
-        return super.getDataObjectTime(pdo);
+    protected void disposeResource() {
+    	unregisterListener(this);
+    	super.disposeResource();
     }
-
+    
+    @Override
+    protected DataTime getDataObjectTime(PluginDataObject pdo) {
+    	BinOffset offset = resourceData.getBinOffset();
+    	if (offset != null) {
+    		return offset.getNormalizedTime(super.getDataObjectTime(pdo));
+    	}
+    	return super.getDataObjectTime(pdo);
+    }
+    
     @Override
     protected void disposeRenderable(IRenderable renderable) {
-
     }
-
+    
     @Override
     protected boolean projectRenderable(IRenderable renderable,
-            CoordinateReferenceSystem crs) throws VizException {
-        return false;
+    		CoordinateReferenceSystem crs) throws VizException {
+    	return false;
     }
-
+    
     @Override
     protected IRenderable constructRenderable(DataTime time,
-            List<PluginDataObject> records) throws VizException {
-        return new USGSGroupRenderable(records);
+    		List<PluginDataObject> records) throws VizException {
+    	return new StreamgaugeGroupRenderable(records);
     }
-
+    
     @Override
     protected boolean updateRenderable(IRenderable renderable,
-            PluginDataObject... pdos) {
-        USGSGroupRenderable groupRenderable = (USGSGroupRenderable) renderable;
-        for (PluginDataObject pdo : pdos) {
-            if (pdo instanceof USGSRecord) {
-                groupRenderable.addRecord((USGSRecord) pdo);
-            }
-        }
-        return true;
+    		PluginDataObject... pdos) {
+    	StreamgaugeGroupRenderable groupRenderable = (StreamgaugeGroupRenderable) renderable;
+    	for (PluginDataObject pdo : pdos) {
+    		if (pdo instanceof StreamflowRecord) {
+    			groupRenderable.addRecord((StreamflowRecord) pdo);
+    		}
+    	}
+    	return true;
     }
 
     @Override
     public String inspect(ReferencedCoordinate coord) throws VizException {
         InterrogateMap dataMap = interrogate(coord,
                 descriptor.getTimeForResource(this),
-                IUSGSDataResource.CLOSEST_USGS_RECORD_INTERROGATE_KEY);
-        USGSRecord record = dataMap
-                .get(IUSGSDataResource.CLOSEST_USGS_RECORD_INTERROGATE_KEY);
+                StreamgaugeDataResource.CLOSEST_STREAMGAUGE_RECORD_INTERROGATE_KEY);
+        StreamflowRecord record = dataMap
+                .get(StreamgaugeDataResource.CLOSEST_STREAMGAUGE_RECORD_INTERROGATE_KEY);
         if (record != null) {
             ColorMapParameters params = getCapability(ColorMapCapability.class)
                     .getColorMapParameters();
             int pixelValue = (int) params.getDisplayToColorMapConverter()
                     .convert(record.getCfs());
             DataMappingPreferences prefs = params.getDataMapping();
-            String usgs = String.valueOf(record.getCfs());
+            String cfs = String.valueOf(record.getCfs());
             for (DataMappingEntry entry : prefs.getEntries()) {
                 if (entry.getPixelValue() == pixelValue) {
-                    usgs = entry.getSample();
+                    cfs = entry.getSample();
                     break;
                 }
             }
 
-            return record.getName() + ": " + usgs + " @ " + record.getDataTime();
+            return record.getStationID() + ": " + cfs + " @ " + record.getDataTime();
         }
         return super.inspect(coord);
     }
@@ -267,8 +261,8 @@ public class USGSResource extends
     @Override
     public Set<InterrogationKey<?>> getInterrogationKeys() {
         return new HashSet<InterrogationKey<?>>(Arrays.asList(
-                IUSGSDataResource.USGS_RECORDS_INTERROGATE_KEY,
-                IUSGSDataResource.CLOSEST_USGS_RECORD_INTERROGATE_KEY));
+                StreamgaugeDataResource.STREAMGAUGE_RECORDS_INTERROGATE_KEY,
+                StreamgaugeDataResource.CLOSEST_STREAMGAUGE_RECORD_INTERROGATE_KEY));
     }
 
     @Override
@@ -276,26 +270,26 @@ public class USGSResource extends
             DataTime time, InterrogationKey<?>... keys) {
         InterrogateMap map = new InterrogateMap();
         if (time != null) {
-            Collection<USGSRecord> records = null;
+            Collection<StreamflowRecord> records = null;
             try {
                 // We have data for this frame, get the renderable
-                USGSGroupRenderable renderable = (USGSGroupRenderable) getOrCreateRenderable(time);
+                StreamgaugeGroupRenderable renderable = (StreamgaugeGroupRenderable) getOrCreateRenderable(time);
                 records = renderable.getRecords();
             } catch (VizException e) {
-                statusHandler.error("Error interrogating USGS Resource", e);
+                statusHandler.error("Error interrogating Streamgauge Resource", e);
             }
             if (records != null) {
                 for (InterrogationKey<?> key : keys) {
-                    if (USGS_RECORDS_INTERROGATE_KEY.equals(key)) {
-                        map.put(USGS_RECORDS_INTERROGATE_KEY,
-                                records.toArray(new USGSRecord[0]));
-                    } else if (CLOSEST_USGS_RECORD_INTERROGATE_KEY.equals(key)) {
+                    if (STREAMGAUGE_RECORDS_INTERROGATE_KEY.equals(key)) {
+                        map.put(STREAMGAUGE_RECORDS_INTERROGATE_KEY,
+                                records.toArray(new StreamflowRecord[0]));
+                    } else if (CLOSEST_STREAMGAUGE_RECORD_INTERROGATE_KEY.equals(key)) {
                         try {
-                            map.put(CLOSEST_USGS_RECORD_INTERROGATE_KEY,
+                            map.put(CLOSEST_STREAMGAUGE_RECORD_INTERROGATE_KEY,
                                     getClosestRecord(coordinate, records));
                         } catch (VizException e) {
                             statusHandler.error(
-                                    "Error getting closest USGSRecord", e);
+                                    "Error getting closest StreamflowRecord", e);
                         }
                     }
                 }
@@ -305,14 +299,14 @@ public class USGSResource extends
 
     }
 
-    private USGSRecord getClosestRecord(ReferencedCoordinate coord,
-            Collection<USGSRecord> records) throws VizException {
+    private StreamflowRecord getClosestRecord(ReferencedCoordinate coord,
+            Collection<StreamflowRecord> records) throws VizException {
         try {
             Coordinate cell = coord.asGridCell(descriptor.getGridGeometry(),
                     PixelInCell.CELL_CENTER);
             double distance = Double.MAX_VALUE;
-            USGSRecord closest = null;
-            for (USGSRecord record : records) {
+            StreamflowRecord closest = null;
+            for (StreamflowRecord record : records) {
                 Coordinate c = record.getGeometry().getCoordinate();
                 double[] pixel = descriptor.worldToPixel(new double[] { c.x,
                         c.y });
@@ -325,7 +319,7 @@ public class USGSResource extends
             }
             return closest;
         } catch (FactoryException | TransformException e) {
-            throw new VizException("Error getting closest USGS record", e);
+            throw new VizException("Error getting closest Streamgauge record", e);
         }
     }
 
@@ -352,9 +346,9 @@ public class USGSResource extends
         InterrogateMap dataMap = interrogatable.interrogate(
                 new ReferencedCoordinate(new Coordinate()), resource
                         .getDescriptor().getTimeForResource(resource),
-                IUSGSDataResource.USGS_RECORDS_INTERROGATE_KEY);
-        USGSRecord[] records = dataMap
-                .get(IUSGSDataResource.USGS_RECORDS_INTERROGATE_KEY);
+                StreamgaugeDataResource.STREAMGAUGE_RECORDS_INTERROGATE_KEY);
+        StreamflowRecord[] records = dataMap
+                .get(StreamgaugeDataResource.STREAMGAUGE_RECORDS_INTERROGATE_KEY);
         if (records != null) {
             IDescriptor descriptor = resource.getDescriptor();
             IRenderableDisplay display = descriptor.getRenderableDisplay();
@@ -362,9 +356,9 @@ public class USGSResource extends
             if (display != null) {
                 filter = display.getExtent();
             }
-            List<USGSRecord> visible = new ArrayList<USGSRecord>();
+            List<StreamflowRecord> visible = new ArrayList<StreamflowRecord>();
             for (Object obj : records) {
-                USGSRecord record = (USGSRecord) obj;
+                StreamflowRecord record = (StreamflowRecord) obj;
                 boolean add = true;
                 if (filter != null) {
                     Coordinate location = record.getGeometry().getCoordinate();
@@ -380,20 +374,21 @@ public class USGSResource extends
             if (visible.isEmpty()) {
                 this.meanValue = Double.NaN;
             } else {
-                Collections.sort(visible, new Comparator<USGSRecord>() {
+                Collections.sort(visible, new Comparator<StreamflowRecord>() {
                     @Override
-                    public int compare(USGSRecord o1, USGSRecord o2) {
+                    public int compare(StreamflowRecord o1, StreamflowRecord o2) {
                         return Double.compare(o1.getCfs(), o2.getCfs());
                     }
                 });
                 double meanTotal = 0;
-                for (USGSRecord record : visible) {
+                for (StreamflowRecord record : visible) {
                     meanTotal += record.getCfs();
                 }
                 this.meanValue = meanTotal / visible.size();
             }
-            this.resourceName = "Air Quality Index (" + valueToText(meanValue) + " avg)";
+            this.resourceName = "River Gauge CFS";
         }
 
 	}
+
 }

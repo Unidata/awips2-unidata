@@ -1,4 +1,4 @@
-package edu.ucar.unidata.uf.viz.usgs.ui;
+package edu.ucar.unidata.uf.viz.streamgauge.ui;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -23,8 +23,9 @@ import com.raytheon.uf.viz.core.rsc.interrogation.Interrogatable;
 import com.raytheon.uf.viz.core.rsc.interrogation.InterrogateMap;
 import com.vividsolutions.jts.geom.Coordinate;
 
-import edu.ucar.unidata.common.dataplugin.usgs.USGSRecord;
-import edu.ucar.unidata.uf.viz.usgs.IUSGSDataResource;
+import edu.ucar.unidata.common.dataplugin.usgs.StreamflowRecord;
+import edu.ucar.unidata.common.dataplugin.usgs.StreamflowStation;
+import edu.ucar.unidata.uf.viz.streamgauge.StreamgaugeDataResource;
 
 /**
  * TODO Add Description
@@ -43,7 +44,7 @@ import edu.ucar.unidata.uf.viz.usgs.IUSGSDataResource;
  * @version 1.0
  */
 
-public class USGSInfoControl implements IPaintListener {
+public class StreamgaugeInfoControl implements IPaintListener {
 	
     private DecimalFormat format = new DecimalFormat("0.00");
 
@@ -61,7 +62,7 @@ public class USGSInfoControl implements IPaintListener {
 
     private final AbstractVizResource<?, ?> resource;
 
-    public USGSInfoControl(AbstractVizResource<?, ?> resource) {
+    public StreamgaugeInfoControl(AbstractVizResource<?, ?> resource) {
         this.resource = resource;
     }
 
@@ -124,9 +125,9 @@ public class USGSInfoControl implements IPaintListener {
         InterrogateMap dataMap = interrogatable.interrogate(
                 new ReferencedCoordinate(new Coordinate()), resource
                         .getDescriptor().getTimeForResource(resource),
-                IUSGSDataResource.USGS_RECORDS_INTERROGATE_KEY);
-        USGSRecord[] records = dataMap
-                .get(IUSGSDataResource.USGS_RECORDS_INTERROGATE_KEY);
+                StreamgaugeDataResource.STREAMGAUGE_RECORDS_INTERROGATE_KEY);
+        StreamflowRecord[] records = dataMap
+                .get(StreamgaugeDataResource.STREAMGAUGE_RECORDS_INTERROGATE_KEY);
         if (records != null) {
             IDescriptor descriptor = resource.getDescriptor();
             IRenderableDisplay display = descriptor.getRenderableDisplay();
@@ -134,12 +135,14 @@ public class USGSInfoControl implements IPaintListener {
             if (display != null) {
                 filter = display.getExtent();
             }
-            List<USGSRecord> visible = new ArrayList<USGSRecord>();
+            List<StreamflowRecord> visible = new ArrayList<StreamflowRecord>();
             for (Object obj : records) {
-                USGSRecord record = (USGSRecord) obj;
+                StreamflowRecord record = (StreamflowRecord) obj;
                 boolean add = true;
                 if (filter != null) {
-                    Coordinate location = record.getGeometry().getCoordinate();
+                	StreamflowStation station = new StreamflowStation();
+                	
+                    Coordinate location =  station.getGeometry().getCoordinate();
                     double[] pixel = descriptor.worldToPixel(new double[] {
                             location.x, location.y });
                     add = filter.contains(pixel);
@@ -152,9 +155,9 @@ public class USGSInfoControl implements IPaintListener {
             if (visible.isEmpty()) {
                 this.meanValue = this.medianValue = this.modeValue = Double.NaN;
             } else {
-                Collections.sort(visible, new Comparator<USGSRecord>() {
+                Collections.sort(visible, new Comparator<StreamflowRecord>() {
                     @Override
-                    public int compare(USGSRecord o1, USGSRecord o2) {
+                    public int compare(StreamflowRecord o1, StreamflowRecord o2) {
                         return Double.compare(o1.getCfs(), o2.getCfs());
                     }
                 });
@@ -174,7 +177,7 @@ public class USGSInfoControl implements IPaintListener {
                 int i = 0;
                 double medianTotal = 0;
 
-                for (USGSRecord record : visible) {
+                for (StreamflowRecord record : visible) {
                     Float usgs = record.getCfs();
 
                     // For mean

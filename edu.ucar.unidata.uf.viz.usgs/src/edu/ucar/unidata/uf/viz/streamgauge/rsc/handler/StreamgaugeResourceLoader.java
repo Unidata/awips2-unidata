@@ -1,4 +1,4 @@
-package edu.ucar.unidata.uf.viz.usgs.rsc.handler;
+package edu.ucar.unidata.uf.viz.streamgauge.rsc.handler;
 
 import java.util.HashMap;
 
@@ -18,8 +18,8 @@ import com.raytheon.uf.viz.core.drawables.ResourcePair;
 import com.raytheon.uf.viz.core.rsc.LoadProperties;
 import com.raytheon.uf.viz.core.rsc.ResourceProperties;
 
-import edu.ucar.unidata.common.dataplugin.usgs.USGSRecord;
-import edu.ucar.unidata.uf.viz.usgs.rsc.USGSResourceData;
+import edu.ucar.unidata.common.dataplugin.usgs.StreamflowRecord;
+import edu.ucar.unidata.uf.viz.streamgauge.rsc.StreamgaugeResourceData;
 
 /**
  * TODO Add Description
@@ -38,7 +38,7 @@ import edu.ucar.unidata.uf.viz.usgs.rsc.USGSResourceData;
  * @version 1.0
  */
 
-public class USGSResourceLoader extends AbstractHandler {
+public class StreamgaugeResourceLoader extends AbstractHandler {
 
     /*
      * (non-Javadoc)
@@ -64,8 +64,8 @@ public class USGSResourceLoader extends AbstractHandler {
                         // Load to all panes
                         HashMap<String, RequestConstraint> metadataMap = new HashMap<String, RequestConstraint>();
                         metadataMap.put(PluginDataObject.PLUGIN_NAME_ID,
-                                new RequestConstraint(USGSRecord.PLUGIN_NAME));
-                        USGSResourceData data = new USGSResourceData();
+                                new RequestConstraint(StreamflowRecord.PLUGIN_NAME));
+                        StreamgaugeResourceData data = new StreamgaugeResourceData();
                         data.setMetadataMap(metadataMap);
                         data.setBinOffset(new BinOffset(1800, 1800));
                         LoadProperties lProps = new LoadProperties();

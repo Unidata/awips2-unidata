@@ -30,13 +30,6 @@
          unpack="false"/>
 
    <plugin
-         id="edu.ucar.unidata.uf.viz.usgs"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="edu.ucar.unidata.common.dataplugin.aqi"
          download-size="0"
          install-size="0"
@@ -59,6 +52,13 @@
 
    <plugin
          id="edu.ucar.unidata.uf.viz.spc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.ucar.unidata.uf.viz.streamgauge"
          download-size="0"
          install-size="0"
          version="0.0.0"

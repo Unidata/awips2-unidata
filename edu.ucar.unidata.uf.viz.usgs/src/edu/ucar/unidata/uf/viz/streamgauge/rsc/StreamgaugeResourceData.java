@@ -1,4 +1,4 @@
-package edu.ucar.unidata.uf.viz.usgs.rsc;
+package edu.ucar.unidata.uf.viz.streamgauge.rsc;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -26,7 +26,7 @@ import com.raytheon.uf.viz.core.rsc.LoadProperties;
  * @version 1.0
  */
 @XmlAccessorType(XmlAccessType.NONE)
-public class USGSResourceData extends AbstractRequestableResourceData {
+public class StreamgaugeResourceData extends AbstractRequestableResourceData {
 
     /*
      * (non-Javadoc)
@@ -39,7 +39,7 @@ public class USGSResourceData extends AbstractRequestableResourceData {
     protected AbstractVizResource<?, ?> constructResource(
             LoadProperties loadProperties, PluginDataObject[] objects)
             throws VizException {
-        return new USGSResource(this, loadProperties, objects);
+        return new StreamgaugeResource(this, loadProperties, objects);
     }
 
 }
