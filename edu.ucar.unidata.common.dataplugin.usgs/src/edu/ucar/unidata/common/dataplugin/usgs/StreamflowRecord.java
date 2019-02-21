@@ -47,10 +47,10 @@ public class StreamflowRecord extends PluginDataObject {
 
     public static final String PLUGIN_NAME = "streamflow";
 
-    @Column(name = "station_id")
+	@Column(name = "station_id")
     @XmlAttribute
     @DynamicSerializeElement
-    private String station_id;
+    private String stationId;
     
     @Column(name = "status")
     @DynamicSerializeElement
@@ -85,11 +85,11 @@ public class StreamflowRecord extends PluginDataObject {
     }
     
 	public String getStationID() {
-		return station_id;
+		return stationId;
 	}
 	
-    public void setStationID(String station_id) {
-        this.station_id = station_id;
+    public void setStationID(String stationId) {
+        this.stationId = stationId;
     }
     
     public String getStatus() {

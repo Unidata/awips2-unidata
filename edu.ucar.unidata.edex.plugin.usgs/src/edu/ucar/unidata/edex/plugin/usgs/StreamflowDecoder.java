@@ -27,9 +27,7 @@ public class StreamflowDecoder {
 
     public PluginDataObject[] decode(byte[] data) throws Exception {
         logger.info("Starting USGS Decoder");
-        
-        String SEASONAL = "Ssn";
-        
+
         ArrayList<StreamflowRecord> list = new ArrayList<StreamflowRecord>();
 
         String input = new String(data);
@@ -43,36 +41,34 @@ public class StreamflowDecoder {
             	if (line.trim().startsWith("USGS")) {
             		String[] values = line.split("\t");
             		
-            		StreamflowRecord record = new StreamflowRecord();
-            		String stationid = values[1];
-            		String cfs = values[4];
-            		String status = values[5];
-            		String height = values[6];
-
-            		String dateString = values[2];
-            		String timeZone = values[3];
-            		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            		dateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
-            		Date date = dateFormat.parse(dateString);
-            		
-            		if (!cfs.equals(SEASONAL)) {
-            			logger.handle(Priority.INFO, stationid);
-            			logger.handle(Priority.INFO, cfs);
-            			logger.handle(Priority.INFO, height);
-            			logger.handle(Priority.INFO, status);
-            			record.setStationID(stationid);
-                		record.setCfs(Float.parseFloat(cfs));
-                		record.setHeight(Float.parseFloat(height));
-                		record.setStatus(status);
-                		record.setDataTime(new DataTime(date));
-                		List<String> allStations = streamflowStationDao.getStationIDs();
-                		StreamflowStation station = getStationByID(stationid);
-                		if (station != null ){
-                			logger.handle(Priority.INFO, station.getStationName());
-                			record.setGeometry(station.getGeometry());
-                		}
-
-                		list.add(record);
+            		if (values.length > 6) {
+	            		StreamflowRecord record = new StreamflowRecord();
+	            		String stationid = values[1];
+	            		String cfs = values[4];
+	            		String status = values[5];
+	            		String height = values[6];
+	            		String dateString = values[2];
+	            		String timeZone = values[3];
+	            		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	            		dateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
+	            		Date date = dateFormat.parse(dateString);
+	            		
+	            		if (! cfs.matches("Rat|Ssn|Ice|Bkw|Eqp") && !cfs.contentEquals("***") && ! cfs.isEmpty() ) {
+	            			record.setStationID(stationid);
+	                		record.setCfs(Float.parseFloat(cfs));
+	                		if (!height.equals("Ssn")){
+		                		record.setHeight(Float.parseFloat(height));
+	                		}
+	                		record.setStatus(status);
+	                		record.setDataTime(new DataTime(date));
+	                		List<String> allStations = streamflowStationDao.getStationIDs();
+	                		StreamflowStation station = getStationByID(stationid);
+	                		if (station != null ){
+	                			record.setGeometry(station.getGeometry());
+	                		}
+	
+	                		list.add(record);
+	            		}
             		}
             	}
             }

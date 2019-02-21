@@ -72,7 +72,12 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
     @XmlAttribute
     @DynamicSerializeElement
     private Float lon;
-
+    
+    @Column(name = "elev")
+    @XmlAttribute
+    @DynamicSerializeElement
+    private Float elevation;
+    
     @Column(name = "the_geom")
     @Type(type = "org.hibernate.spatial.GeometryType")
     @XmlJavaTypeAdapter(value = GeometryAdapter.class)
@@ -119,7 +124,15 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
         this.lon = lon;
     }
 
-    @Override
+    public Float getElevation() {
+		return elevation;
+	}
+
+	public void setElevation(Float elevation) {
+		this.elevation = elevation;
+	}
+
+	@Override
     public Geometry getGeometry() {
         return station;
     }

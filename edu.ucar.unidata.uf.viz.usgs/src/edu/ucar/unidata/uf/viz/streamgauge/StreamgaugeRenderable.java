@@ -1,4 +1,4 @@
-package edu.ucar.unidata.uf.viz.usgs;
+package edu.ucar.unidata.uf.viz.streamgauge;
 
 import org.eclipse.swt.graphics.RGB;
 
@@ -16,7 +16,7 @@ import com.raytheon.uf.viz.core.map.IMapDescriptor;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
-import edu.ucar.unidata.common.dataplugin.usgs.USGSRecord;
+import edu.ucar.unidata.common.dataplugin.usgs.StreamflowRecord;
 
 /**
  * Abstract USGS Renderable object
@@ -35,11 +35,11 @@ import edu.ucar.unidata.common.dataplugin.usgs.USGSRecord;
  * @version 1.0
  */
 
-public class USGSRenderable implements IRenderable {
+public class StreamgaugeRenderable implements IRenderable {
 
     private final IMapDescriptor descriptor;
 
-    private USGSRecord record;
+    private StreamflowRecord record;
 
     private double[] recordLocation;
 
@@ -53,15 +53,15 @@ public class USGSRenderable implements IRenderable {
 
     private IFont font;
 
-    public USGSRenderable(IMapDescriptor descriptor) {
+    public StreamgaugeRenderable(IMapDescriptor descriptor) {
         this.descriptor = descriptor;
     }
 
-    public USGSRecord getRecord() {
+    public StreamflowRecord getRecord() {
         return record;
     }
 
-    public void setRecord(USGSRecord record) {
+    public void setRecord(StreamflowRecord record) {
         this.record = record;
         if (record != null) {
             Coordinate location = record.getGeometry().getCoordinate();
