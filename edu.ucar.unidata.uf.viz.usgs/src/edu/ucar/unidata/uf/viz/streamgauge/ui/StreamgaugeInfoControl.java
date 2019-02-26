@@ -1,6 +1,5 @@
 package edu.ucar.unidata.uf.viz.streamgauge.ui;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,7 +27,6 @@ import edu.ucar.unidata.common.dataplugin.usgs.StreamflowStation;
 import edu.ucar.unidata.uf.viz.streamgauge.StreamgaugeDataResource;
 
 /**
- * TODO Add Description
  * 
  * <pre>
  * 
@@ -46,19 +44,9 @@ import edu.ucar.unidata.uf.viz.streamgauge.StreamgaugeDataResource;
 
 public class StreamgaugeInfoControl implements IPaintListener {
 	
-    private DecimalFormat format = new DecimalFormat("0.00");
-
-    private Text mean;
-
-    private double meanValue = Double.NaN;
-
-    private Text median;
-
-    private double medianValue = Double.NaN;
-
-    private Text mode;
-
-    private double modeValue = Double.NaN;
+    private Text cfsText;
+    
+    private Double maxValue = Double.NaN;
 
     private final AbstractVizResource<?, ?> resource;
 
@@ -76,40 +64,17 @@ public class StreamgaugeInfoControl implements IPaintListener {
 
         Label label = new Label(parent, SWT.RIGHT);
         label.setLayoutData(labelData);
-        label.setText("Mean:");
+        label.setText("Max:");
 
-        mean = new Text(parent, SWT.READ_ONLY | SWT.BORDER);
-        mean.setLayoutData(textData);
-        mean.setText(valueToText(meanValue));
-
-        label = new Label(parent, SWT.RIGHT);
-        label.setLayoutData(labelData);
-        label.setText("Median:");
-
-        median = new Text(parent, SWT.READ_ONLY | SWT.BORDER);
-        median.setLayoutData(textData);
-        median.setText(valueToText(medianValue));
-
-        label = new Label(parent, SWT.RIGHT);
-        label.setLayoutData(labelData);
-        label.setText("Mode:");
-
-        mode = new Text(parent, SWT.READ_ONLY | SWT.BORDER);
-        mode.setLayoutData(textData);
-        mode.setText(valueToText(modeValue));
+        cfsText = new Text(parent, SWT.READ_ONLY | SWT.BORDER);
+        cfsText.setLayoutData(textData);
+        cfsText.setText(maxValue.toString());
 
         resource.registerListener(this);
     }
 
     public void dispose() {
         resource.unregisterListener(this);
-    }
-
-    private String valueToText(double value) {
-        if (Double.isNaN(value)) {
-            return "?.??";
-        }
-        return format.format(value);
     }
 
     /*
@@ -140,9 +105,7 @@ public class StreamgaugeInfoControl implements IPaintListener {
                 StreamflowRecord record = (StreamflowRecord) obj;
                 boolean add = true;
                 if (filter != null) {
-                	StreamflowStation station = new StreamflowStation();
-                	
-                    Coordinate location =  station.getGeometry().getCoordinate();
+                    Coordinate location =  record.getGeometry().getCoordinate();
                     double[] pixel = descriptor.worldToPixel(new double[] {
                             location.x, location.y });
                     add = filter.contains(pixel);
@@ -153,7 +116,7 @@ public class StreamgaugeInfoControl implements IPaintListener {
             }
 
             if (visible.isEmpty()) {
-                this.meanValue = this.medianValue = this.modeValue = Double.NaN;
+                this.maxValue = Double.NaN;
             } else {
                 Collections.sort(visible, new Comparator<StreamflowRecord>() {
                     @Override
@@ -161,63 +124,16 @@ public class StreamgaugeInfoControl implements IPaintListener {
                         return Double.compare(o1.getCfs(), o2.getCfs());
                     }
                 });
-
-                float modeCfs = Float.NaN;
-                int modeCount = 0;
-                float currentCfs = 0;
-                int currentCount = 0;
-                double meanTotal = 0;
-
-                int medianStartIndex = visible.size() / 2;
-                int medianEndIndex = medianStartIndex;
-                if (visible.size() % 2 == 0) {
-                    medianStartIndex -= 1;
-                }
-
-                int i = 0;
-                double medianTotal = 0;
-
+                
+                Float maxCfs = new Float(0);
                 for (StreamflowRecord record : visible) {
-                    Float usgs = record.getCfs();
-
-                    // For mean
-                    meanTotal += usgs;
-
-                    // For median
-                    if (i >= medianStartIndex && i <= medianEndIndex) {
-                        medianTotal += usgs;
+                    if (record.getCfs() > maxCfs) {
+                        maxCfs = record.getCfs();
                     }
-
-                    // For mode
-                    if (currentCfs == 0) {
-                        currentCfs = usgs;
-                        modeCfs = usgs;
-                    }
-
-                    if (usgs != currentCfs) {
-                        // Cfs changed, update modeCfs
-                        if (modeCount < currentCount) {
-                            modeCfs = currentCfs;
-                            modeCount = currentCount;
-                        }
-
-                        currentCount = 0;
-                        currentCfs = usgs;
-                    }
-                    currentCount += 1;
-
-                    i += 1;
                 }
-                this.meanValue = meanTotal / visible.size();
-                this.medianValue = medianTotal
-                        / (medianEndIndex - medianStartIndex + 1);
-                this.modeValue = modeCfs;
+                this.maxValue = (double) maxCfs;
             }
-
-            this.mean.setText(valueToText(meanValue));
-            this.median.setText(valueToText(medianValue));
-            this.mode.setText(valueToText(modeValue));
+            this.cfsText.setText(this.maxValue.toString());
         }
     }
-
 }

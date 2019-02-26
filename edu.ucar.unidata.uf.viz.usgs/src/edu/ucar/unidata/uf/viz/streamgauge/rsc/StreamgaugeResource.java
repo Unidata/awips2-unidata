@@ -74,7 +74,7 @@ public class StreamgaugeResource extends
 		implements StreamgaugeDataResource, IPaintListener {
 
 	private String resourceName = "River Gauge CFS";
-	private double meanValue;
+	private double maxValue;
     private DecimalFormat format = new DecimalFormat("0.0");
 	
     private class StreamgaugeGroupRenderable implements IRenderable {
@@ -242,18 +242,8 @@ public class StreamgaugeResource extends
         if (record != null) {
             ColorMapParameters params = getCapability(ColorMapCapability.class)
                     .getColorMapParameters();
-            int pixelValue = (int) params.getDisplayToColorMapConverter()
-                    .convert(record.getCfs());
-            DataMappingPreferences prefs = params.getDataMapping();
-            String cfs = String.valueOf(record.getCfs());
-            for (DataMappingEntry entry : prefs.getEntries()) {
-                if (entry.getPixelValue() == pixelValue) {
-                    cfs = entry.getSample();
-                    break;
-                }
-            }
-
-            return record.getStationID() + ": " + cfs + " @ " + record.getDataTime();
+            return record.getStationName() + "\n   " + String.valueOf(record.getCfs()) + " cfs/ "+ 
+            	String.valueOf(record.getHeight()) + " ft @ " + record.getDataTime();
         }
         return super.inspect(coord);
     }
@@ -372,7 +362,7 @@ public class StreamgaugeResource extends
             }
 
             if (visible.isEmpty()) {
-                this.meanValue = Double.NaN;
+                this.maxValue = Double.NaN;
             } else {
                 Collections.sort(visible, new Comparator<StreamflowRecord>() {
                     @Override
@@ -380,11 +370,13 @@ public class StreamgaugeResource extends
                         return Double.compare(o1.getCfs(), o2.getCfs());
                     }
                 });
-                double meanTotal = 0;
+                double maxCfs = 0;
                 for (StreamflowRecord record : visible) {
-                    meanTotal += record.getCfs();
+                	if (record.getCfs() > maxCfs) {
+                		maxCfs = record.getCfs();
+                	}
                 }
-                this.meanValue = meanTotal / visible.size();
+                this.maxValue = maxCfs;
             }
             this.resourceName = "River Gauge CFS";
         }

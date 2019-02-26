@@ -1,14 +1,10 @@
 package edu.ucar.unidata.common.dataplugin.usgs;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.hibernate.annotations.Index;
@@ -35,23 +31,34 @@ import com.vividsolutions.jts.geom.Geometry;
 
 @Entity
 @SequenceGenerator(initialValue = 1, name = PluginDataObject.ID_GEN, sequenceName = "streamflowseq")
-//@Table(name = StreamflowRecord.PLUGIN_NAME, uniqueConstraints = { @UniqueConstraint(columnNames = { "dataURI" }) })
-@Table(name = StreamflowRecord.PLUGIN_NAME, uniqueConstraints = { @UniqueConstraint(columnNames = {
-        "station_id", "status", "cfs", "height", "refTime" }) })
-@org.hibernate.annotations.Table(appliesTo = StreamflowRecord.PLUGIN_NAME, indexes = {
-        @Index(name = "%TABLE%_cfsandheight_index", columnNames = {"cfs", "height"}) })
+@Table(name = StreamflowRecord.PLUGIN_NAME, uniqueConstraints = { @UniqueConstraint(
+		columnNames = { "stationid", "refTime" } ) })
+@org.hibernate.annotations.Table(
+		appliesTo = StreamflowRecord.PLUGIN_NAME, 
+		indexes = { @Index(
+				name = "sf_refTimeIndex", 
+				columnNames = {"refTime", "forecastTime" }) }
+		)
 @DynamicSerialize
 public class StreamflowRecord extends PluginDataObject {
 
     private static final long serialVersionUID = 1L;
 
     public static final String PLUGIN_NAME = "streamflow";
-
-	@Column(name = "station_id")
-    @XmlAttribute
-    @DynamicSerializeElement
-    private String stationId;
     
+	@Column(name = "stationid")
+    @DataURI(position = 1)
+    @DynamicSerializeElement
+    private String stationID;
+    
+	@Column(name = "stationname")
+    @DynamicSerializeElement
+	private String stationName;
+	
+	@Column(name = "elevation")
+    @DynamicSerializeElement
+	private Float elevation;
+	
     @Column(name = "status")
     @DynamicSerializeElement
     private String status;
@@ -63,36 +70,41 @@ public class StreamflowRecord extends PluginDataObject {
     @Column(name = "height")
     @DynamicSerializeElement
     private Float height;
-
+    
     @Column(name = "location", columnDefinition = "geometry")
     @Type(type = "org.hibernate.spatial.GeometryType")
     @XmlJavaTypeAdapter(value = GeometryAdapter.class)
     @DynamicSerializeElement
     private Geometry geometry;
 
-    /**
-     * Default Constructor
-     */
     public StreamflowRecord() {
     }
-    
-	public Geometry getGeometry() {
-        return geometry;
-    }
 
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-    }
+    public String getStationID() {
+		return stationID;
+	}
     
-	public String getStationID() {
-		return stationId;
+	public void setStationID(String id) {
+		this.stationID = id;
 	}
 	
-    public void setStationID(String stationId) {
-        this.stationId = stationId;
-    }
-    
-    public String getStatus() {
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(String name) {
+		this.stationName = name;
+	}
+
+	public Float getElevation() {
+		return elevation;
+	}
+
+	public void setElevation(Float elev) {
+		this.elevation = elev;
+	}
+
+	public String getStatus() {
         return status;
     }
 
@@ -116,8 +128,17 @@ public class StreamflowRecord extends PluginDataObject {
         this.height = height;
     }
     
+	public Geometry getGeometry() {
+		return geometry;
+	}
+
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
+    
 	@Override
 	public String getPluginName() {
 		return PLUGIN_NAME;
 	}
+
 }

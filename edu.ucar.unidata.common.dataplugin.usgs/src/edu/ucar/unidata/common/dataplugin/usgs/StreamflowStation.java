@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -82,8 +81,11 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
     @Type(type = "org.hibernate.spatial.GeometryType")
     @XmlJavaTypeAdapter(value = GeometryAdapter.class)
     @DynamicSerializeElement
-    private Point station;
-
+    private Point geometry;
+    
+    public StreamflowStation() {
+    }
+    
     public String getStationId() {
 		return station_id;
     }
@@ -124,18 +126,23 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
         this.lon = lon;
     }
 
-    public Float getElevation() {
+
+	public Float getElevation() {
 		return elevation;
 	}
 
 	public void setElevation(Float elevation) {
 		this.elevation = elevation;
 	}
-
+	
 	@Override
     public Geometry getGeometry() {
-        return station;
+        return geometry;
     }
+	
+    public void setGeometry(Point geometry) {
+		this.geometry = geometry;
+	}
 
     @Override
     public CoordinateReferenceSystem getCrs() {
@@ -151,4 +158,5 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
     public Integer getNy() {
         return 0;
     }
+    
 }

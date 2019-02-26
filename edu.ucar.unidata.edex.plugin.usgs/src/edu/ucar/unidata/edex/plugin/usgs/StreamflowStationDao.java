@@ -7,6 +7,7 @@ import com.raytheon.uf.common.dataquery.db.QueryResult;
 import com.raytheon.uf.edex.database.DataAccessLayerException;
 import com.raytheon.uf.edex.database.dao.CoreDao;
 import com.raytheon.uf.edex.database.dao.DaoConfig;
+
 import edu.ucar.unidata.common.dataplugin.usgs.StreamflowStation;
 
 public class StreamflowStationDao extends CoreDao {

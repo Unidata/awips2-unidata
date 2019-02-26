@@ -3,6 +3,7 @@ package edu.ucar.unidata.edex.plugin.usgs;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -26,55 +27,59 @@ public class StreamflowDecoder {
     private IUFStatusHandler logger = UFStatus.getHandler(StreamflowDecoder.class);
 
     public PluginDataObject[] decode(byte[] data) throws Exception {
-        logger.info("Starting USGS Decoder");
+        logger.info("Starting USGS Streamgauge Decoder");
 
         ArrayList<StreamflowRecord> list = new ArrayList<StreamflowRecord>();
 
         String input = new String(data);
         String[] lines = input.split("\n");
+		String[] filterStrings = {"Rat","Ssn","Ice","Bkw","Eqp","***"};
 
         for(String line : lines) {
         	
         	if (line.trim().startsWith("#")) {
                 continue;
-        	} else {
-            	if (line.trim().startsWith("USGS")) {
-            		String[] values = line.split("\t");
+        	} else if (line.trim().startsWith("USGS") && ! lineContains(line, filterStrings)) {
+        		
+        		String[] values = line.split("\t");
+        		StreamflowStation station = getStationByID(values[1]);
+        		
+        		if (station != null && values.length > 6) {
             		
-            		if (values.length > 6) {
-	            		StreamflowRecord record = new StreamflowRecord();
-	            		String stationid = values[1];
-	            		String cfs = values[4];
-	            		String status = values[5];
-	            		String height = values[6];
-	            		String dateString = values[2];
-	            		String timeZone = values[3];
-	            		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	            		dateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
-	            		Date date = dateFormat.parse(dateString);
-	            		
-	            		if (! cfs.matches("Rat|Ssn|Ice|Bkw|Eqp") && !cfs.contentEquals("***") && ! cfs.isEmpty() ) {
-	            			record.setStationID(stationid);
-	                		record.setCfs(Float.parseFloat(cfs));
-	                		if (!height.equals("Ssn")){
-		                		record.setHeight(Float.parseFloat(height));
-	                		}
-	                		record.setStatus(status);
-	                		record.setDataTime(new DataTime(date));
-	                		List<String> allStations = streamflowStationDao.getStationIDs();
-	                		StreamflowStation station = getStationByID(stationid);
-	                		if (station != null ){
-	                			record.setGeometry(station.getGeometry());
-	                		}
-	
-	                		list.add(record);
-	            		}
+        			String stationid = values[1];
+            		String dateString = values[2];
+            		String timeZone = values[3];
+        			String cfs = values[4];
+            		String status = values[5];
+            		String height = values[6];
+            		
+            		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            		dateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
+            		Date date = dateFormat.parse(dateString);
+            		
+            		if (! cfs.isEmpty() ) {
+            			StreamflowRecord record = new StreamflowRecord();
+            			record.setStationID(stationid);
+                		record.setCfs(Float.parseFloat(cfs));
+                		record.setHeight(Float.parseFloat(height));
+                		record.setStatus(status);
+                		record.setDataTime(new DataTime(date));
+            			record.setElevation(station.getElevation());
+            			record.setStationName(station.getStationName());
+            			record.setGeometry(station.getGeometry());
+            			                		
+                		list.add(record);
             		}
-            	}
+        		}
             }
         }
-        logger.info("Finished USGS Decoder");
+        
+        logger.info("Finished USGS Streamgauge Decoder");
         return (list.toArray(new PluginDataObject[list.size()]));
+    }
+    
+    private static boolean lineContains(String inputStr, String[] items) {
+        return Arrays.stream(items).parallel().anyMatch(inputStr::contains);
     }
     
     /**

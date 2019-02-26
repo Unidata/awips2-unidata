@@ -33,4 +33,14 @@
 	      </menuContribution>
 	</extension>
 	
+		<extension
+	      point="com.raytheon.viz.ui.contextualMenu">
+	    <contextualMenu
+	          actionClass="edu.ucar.unidata.uf.viz.streamgauge.ui.OpenStreamgaugeInfoAction"
+	          capabilityInterface="edu.ucar.unidata.uf.viz.streamgauge.StreamgaugeDataResource"
+	          name="River Gauge info..."
+	          sortID="50">
+	    </contextualMenu>
+	</extension>
+	
 </plugin>

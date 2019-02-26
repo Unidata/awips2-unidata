@@ -14,7 +14,6 @@ import com.raytheon.uf.viz.core.drawables.PaintProperties;
 import com.raytheon.uf.viz.core.exception.VizException;
 import com.raytheon.uf.viz.core.map.IMapDescriptor;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 
 import edu.ucar.unidata.common.dataplugin.usgs.StreamflowRecord;
 
@@ -65,8 +64,7 @@ public class StreamgaugeRenderable implements IRenderable {
         this.record = record;
         if (record != null) {
             Coordinate location = record.getGeometry().getCoordinate();
-            this.recordLocation = descriptor.worldToPixel(new double[] {
-                    location.x, location.y });
+            this.recordLocation = descriptor.worldToPixel(new double[] { location.x, location.y });
         } else {
             this.recordLocation = null;
         }
@@ -83,16 +81,16 @@ public class StreamgaugeRenderable implements IRenderable {
     @Override
     public void paint(IGraphicsTarget target, PaintProperties paintProps)
             throws VizException {
-        DrawableString string = getUSGSString(paintProps);
+        DrawableString string = getDrawableString(paintProps);
         if (string != null) {
             target.drawStrings(string);
         }
     }
 
-    public DrawableString getUSGSString(PaintProperties paintProps) {
+    public DrawableString getDrawableString(PaintProperties paintProps) {
         DrawableString string = null;
         if (recordLocation != null) {
-            string = new DrawableString(Float.toString(record.getCfs()),
+            string = new DrawableString(Float.toString(Math.round(record.getCfs())),
                     getColorByValue(record.getCfs()));
             string.setCoordinates(recordLocation[0], recordLocation[1]);
             string.horizontalAlignment = getHorizontalTextAlignment();
