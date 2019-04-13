@@ -153,7 +153,9 @@ public class StreamgaugeMapMouseHandler extends InputAdapter {
 	                    	
 	                    		Map<String, String> variableSubstitutions = new HashMap<>();
 	                    		variableSubstitutions.put("stationid", pt.getStationId());
-	                        new LoadBundleHandler("bundles/StreamgaugeTimeSeries.xml", 
+	                    		variableSubstitutions.put("lat", pt.getLatitude().toString());
+	                    		variableSubstitutions.put("lon", pt.getLongitude().toString());
+	                        new LoadBundleHandler("bundles/streamgauge/timeseries.xml", 
 	                        			variableSubstitutions, 
 	                        			null, 
 	                        			true).execute(null);
@@ -204,8 +206,8 @@ public class StreamgaugeMapMouseHandler extends InputAdapter {
                 try {
                 	gc = new GeodeticCalculator(desc.getCRS());
                     gc.setStartingGeographicPoint(pt.x, pt.y);
-                    gc.setDestinationGeographicPoint(selectPoint.getLon(),
-                    		selectPoint.getLat());
+                    gc.setDestinationGeographicPoint(selectPoint.getLongitude(),
+                    		selectPoint.getLatitude());
                     dist = gc.getOrthodromicDistance();
                     if (dist < minDistance) {
                         minDistance = dist;

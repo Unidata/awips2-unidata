@@ -21,7 +21,7 @@
 	<extension
 	      point="org.eclipse.ui.menus">
 	      <menuContribution
-             locationURI="menu:radar">
+             locationURI="menu:Radar">
              <command
                    label="Streamgauge Resource"
                    commandId="com.raytheon.uf.viz.ui.loadbundle">

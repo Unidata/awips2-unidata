@@ -12,12 +12,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.hibernate.annotations.Type;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.raytheon.uf.common.dataplugin.persist.PersistableDataObject;
 import com.raytheon.uf.common.geospatial.ISpatialObject;
 import com.raytheon.uf.common.geospatial.adapter.GeometryAdapter;
 import com.raytheon.uf.common.serialization.annotations.DynamicSerialize;
 import com.raytheon.uf.common.serialization.annotations.DynamicSerializeElement;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -41,21 +39,20 @@ import com.vividsolutions.jts.geom.Point;
 @Table(name = "streamflow_spatial")
 @XmlAccessorType(XmlAccessType.NONE)
 @DynamicSerialize
-public class StreamflowStation extends PersistableDataObject<Object> implements
-        ISpatialObject {
+public class StreamflowStation  implements ISpatialObject {
 
     private static final long serialVersionUID = 1L;
     
     @Id
-    @Column(name = "station_id")
+    @Column(name = "stationid")
     @XmlAttribute
     @DynamicSerializeElement
-    private String station_id;
+    private String stationid;
     
-    @Column(name = "station_name")
+    @Column(name = "stationname")
     @XmlAttribute
     @DynamicSerializeElement
-    private String stationName;
+    private String stationname;
     
     @Column(name = "source")
     @XmlAttribute
@@ -65,12 +62,12 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
 	@Column(name = "lat")
     @XmlAttribute
     @DynamicSerializeElement
-    private Float lat;
+    private Float latitude;
 
     @Column(name = "lon")
     @XmlAttribute
     @DynamicSerializeElement
-    private Float lon;
+    private Float longitude;
     
     @Column(name = "elev")
     @XmlAttribute
@@ -81,25 +78,25 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
     @Type(type = "org.hibernate.spatial.GeometryType")
     @XmlJavaTypeAdapter(value = GeometryAdapter.class)
     @DynamicSerializeElement
-    private Point geometry;
+    private Point location;
     
     public StreamflowStation() {
     }
     
     public String getStationId() {
-		return station_id;
+		return stationid;
     }
 
-    public void setStationId(String stationId) {
-    	this.station_id = stationId;
+    public void setStationId(String stationid) {
+    	this.stationid = stationid;
     }
 
     public String getStationName() {
-		return stationName;
+		return stationname;
 	}
 
     public void setStationName(String stationName) {
-    	this.stationName = stationName;
+    	this.stationname = stationName;
     }
 
 	public String getSource() {
@@ -110,20 +107,20 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
 		this.source = source;
 	}
 
-    public Float getLat() {
-        return lat;
+    public Float getLatitude() {
+        return latitude;
     }
 
-    public void setLat(Float lat) {
-        this.lat = lat;
+    public void setLatitude(Float lat) {
+        this.latitude = lat;
     }
 
-    public Float getLon() {
-        return lon;
+    public Float getLongitude() {
+        return longitude;
     }
 
-    public void setLon(Float lon) {
-        this.lon = lon;
+    public void setLongitude(Float lon) {
+        this.longitude = lon;
     }
 
 
@@ -136,13 +133,9 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
 	}
 	
 	@Override
-    public Geometry getGeometry() {
-        return geometry;
+    public Point getGeometry() {
+        return location;
     }
-	
-    public void setGeometry(Point geometry) {
-		this.geometry = geometry;
-	}
 
     @Override
     public CoordinateReferenceSystem getCrs() {
@@ -151,12 +144,12 @@ public class StreamflowStation extends PersistableDataObject<Object> implements
 
     @Override
     public Integer getNx() {
-        return 0;
+        return null;
     }
 
     @Override
     public Integer getNy() {
-        return 0;
+        return null;
     }
     
 }

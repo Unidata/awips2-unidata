@@ -1,7 +1,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd  
-  http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd  
+    http://camel.apache.org/schema/spring 
+    http://camel.apache.org/schema/spring/camel-spring.xsd">
 
 	<bean id="streamflowPluginName" class="java.lang.String">
 		<constructor-arg type="java.lang.String" value="streamflow" />
@@ -13,24 +15,9 @@
 		<property name="record" value="edu.ucar.unidata.common.dataplugin.usgs.StreamflowRecord" />
 	</bean>
 	
-	<bean id="streamflowRegistered" factory-bean="pluginRegistry" factory-method="register">
+	<bean factory-bean="pluginRegistry" factory-method="register">
 		<constructor-arg ref="streamflowPluginName"/>
 		<constructor-arg ref="streamflowProperties"/>
-	</bean>
-
-	<bean id="streamflowSpatialDataFactory"
-		class="com.raytheon.uf.common.dataaccess.impl.StationGeometryTimeAgnosticDatabaseFactory">
-		<constructor-arg value="awips" />
-		<constructor-arg value="metadata" />
-		<constructor-arg value="streamflow_spatial" />
-		<constructor-arg value="the_geom" />
-		<constructor-arg value="station_id" />
-	</bean>
-
-	<bean factory-bean="dataAccessRegistry" factory-method="register"
-		depends-on="streamflowSpatialDataFactory">
-		<constructor-arg value="streamflow_spatial" />
-		<constructor-arg ref="streamflowSpatialDataFactory" />
 	</bean>
 
 </beans>

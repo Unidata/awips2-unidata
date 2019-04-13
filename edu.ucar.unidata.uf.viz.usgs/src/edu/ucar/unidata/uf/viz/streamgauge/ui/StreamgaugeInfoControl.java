@@ -23,7 +23,6 @@ import com.raytheon.uf.viz.core.rsc.interrogation.InterrogateMap;
 import com.vividsolutions.jts.geom.Coordinate;
 
 import edu.ucar.unidata.common.dataplugin.usgs.StreamflowRecord;
-import edu.ucar.unidata.common.dataplugin.usgs.StreamflowStation;
 import edu.ucar.unidata.uf.viz.streamgauge.StreamgaugeDataResource;
 
 /**
@@ -121,7 +120,7 @@ public class StreamgaugeInfoControl implements IPaintListener {
                 Collections.sort(visible, new Comparator<StreamflowRecord>() {
                     @Override
                     public int compare(StreamflowRecord o1, StreamflowRecord o2) {
-                        return Double.compare(o1.getCfs(), o2.getCfs());
+                        return Double.compare(o1.getCfs(),o2.getCfs());
                     }
                 });
                 

@@ -17,7 +17,7 @@ public class StreamflowStationDao extends CoreDao {
     }
 
     public StreamflowStation queryByStationId(String id) throws DataAccessLayerException {
-        List<?> stations = queryBySingleCriteria("station_id", id);
+        List<?> stations = queryBySingleCriteria("id", id);
         if (stations.isEmpty()) {
             return null;
         } else {
@@ -26,7 +26,7 @@ public class StreamflowStationDao extends CoreDao {
     }
 
     public List<String> getStationIDs() {
-        String buf = "select station_id from " + daoClass.getName();
+        String buf = "select id from " + daoClass.getName();
         QueryResult result = this.executeHQLQuery(buf);
         List<String> stationIds = new ArrayList<String>();
         for (int i = 0; i < result.getResultCount(); i++) {

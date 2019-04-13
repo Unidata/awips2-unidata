@@ -211,8 +211,8 @@ public class StreamgaugeMapResource extends
     	   	   StreamflowStation loc = new StreamflowStation();
            Integer blockNumber = entry.getValue().blockNumber;
            loc.setStationId(blockNumber.toString());
-           loc.setLat((float) entry.getValue().latlon.y);
-           loc.setLon((float) entry.getValue().latlon.x);
+           loc.setLatitude((float) entry.getValue().latlon.y);
+           loc.setLongitude((float) entry.getValue().latlon.x);
            loc.setStationName(entry.getValue().accessId);
            locs.add(loc);
        }
@@ -281,8 +281,8 @@ public class StreamgaugeMapResource extends
            RGB color = new RGB (200,200,200);
            for (StreamflowStation p : points) {
                double lon, lat;
-               lon = p.getLon();
-               lat = p.getLat();
+               lon = p.getLongitude();
+               lat = p.getLatitude();
                double[] pixel = descriptor.worldToPixel(new double[] { lon, lat });
                DrawableCircle circle = new DrawableCircle();
                circle.setCoordinates(pixel[0], pixel[1]);

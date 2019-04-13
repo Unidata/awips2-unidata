@@ -1,6 +1,5 @@
 package edu.ucar.unidata.uf.viz.streamgauge.rsc;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,7 +24,6 @@ import com.raytheon.uf.common.colormap.prefs.DataMappingPreferences;
 import com.raytheon.uf.common.colormap.prefs.DataMappingPreferences.DataMappingEntry;
 import com.raytheon.uf.common.dataplugin.PluginDataObject;
 import com.raytheon.uf.common.geospatial.ReferencedCoordinate;
-import com.raytheon.uf.common.localization.IPathManager;
 import com.raytheon.uf.common.time.BinOffset;
 import com.raytheon.uf.common.time.DataTime;
 import com.raytheon.uf.viz.core.IExtent;
@@ -75,7 +73,6 @@ public class StreamgaugeResource extends
 
 	private String resourceName = "River Gauge CFS";
 	private double maxValue;
-    private DecimalFormat format = new DecimalFormat("0.0");
 	
     private class StreamgaugeGroupRenderable implements IRenderable {
 
@@ -136,7 +133,7 @@ public class StreamgaugeResource extends
         ColorMapParameters params = new ColorMapParameters();
 
         try {
-            params.setColorMap(ColorMapLoader.loadColorMap("Air Quality Index"));
+            params.setColorMap(ColorMapLoader.loadColorMap("Matplotlib/Blues"));
         } catch (ColorMapException e) {
             throw new VizException(e);
         }
@@ -240,9 +237,7 @@ public class StreamgaugeResource extends
         StreamflowRecord record = dataMap
                 .get(StreamgaugeDataResource.CLOSEST_STREAMGAUGE_RECORD_INTERROGATE_KEY);
         if (record != null) {
-            ColorMapParameters params = getCapability(ColorMapCapability.class)
-                    .getColorMapParameters();
-            return record.getStationName() + "\n   " + String.valueOf(record.getCfs()) + " cfs/ "+ 
+            return record.getStationid() + ": " +  record.getName() + "\n" + String.valueOf(record.getCfs()) + " cfs/ "+ 
             	String.valueOf(record.getHeight()) + " ft @ " + record.getDataTime();
         }
         return super.inspect(coord);
@@ -297,7 +292,7 @@ public class StreamgaugeResource extends
             double distance = Double.MAX_VALUE;
             StreamflowRecord closest = null;
             for (StreamflowRecord record : records) {
-                Coordinate c = record.getGeometry().getCoordinate();
+                Coordinate c = record.getLocation().getGeometry().getCoordinate();
                 double[] pixel = descriptor.worldToPixel(new double[] { c.x,
                         c.y });
                 Coordinate recordLoc = new Coordinate(pixel[0], pixel[1]);
@@ -322,13 +317,6 @@ public class StreamgaugeResource extends
     public String getName() {
         return this.resourceName;
     }
-
-    private String valueToText(double value) {
-        if (Double.isNaN(value)) {
-            return "?.??";
-        }
-		return format.format(value);
-    }
     
 	@Override
 	public void painted(AbstractVizResource<?, ?> resource) {
@@ -351,7 +339,7 @@ public class StreamgaugeResource extends
                 StreamflowRecord record = (StreamflowRecord) obj;
                 boolean add = true;
                 if (filter != null) {
-                    Coordinate location = record.getGeometry().getCoordinate();
+                    Coordinate location = record.getLocation().getGeometry().getCoordinate();
                     double[] pixel = descriptor.worldToPixel(new double[] {
                             location.x, location.y });
                     add = filter.contains(pixel);
@@ -367,14 +355,14 @@ public class StreamgaugeResource extends
                 Collections.sort(visible, new Comparator<StreamflowRecord>() {
                     @Override
                     public int compare(StreamflowRecord o1, StreamflowRecord o2) {
-                        return Double.compare(o1.getCfs(), o2.getCfs());
+                    	return Double.compare(o1.getCfs(),o2.getCfs());
                     }
                 });
                 double maxCfs = 0;
                 for (StreamflowRecord record : visible) {
                 	if (record.getCfs() > maxCfs) {
-                		maxCfs = record.getCfs();
-                	}
+                        maxCfs = record.getCfs();
+                    }
                 }
                 this.maxValue = maxCfs;
             }

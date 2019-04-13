@@ -37,6 +37,13 @@
          unpack="false"/>
 
    <plugin
+         id="edu.ucar.unidata.common.dataplugin.spc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="edu.ucar.unidata.uf.viz.aqi"
          download-size="0"
          install-size="0"
@@ -44,7 +51,7 @@
          unpack="false"/>
 
    <plugin
-         id="edu.ucar.unidata.common.dataplugin.spc"
+         id="edu.ucar.unidata.uf.viz.usgs"
          download-size="0"
          install-size="0"
          version="0.0.0"

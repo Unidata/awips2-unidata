@@ -5,10 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 import com.raytheon.uf.common.dataplugin.PluginDataObject;
+import com.raytheon.uf.common.pointdata.spatial.SurfaceObsLocation;
 import com.raytheon.uf.common.status.IUFStatusHandler;
 import com.raytheon.uf.common.status.UFStatus;
 import com.raytheon.uf.common.status.UFStatus.Priority;
@@ -42,11 +42,16 @@ public class StreamflowDecoder {
         	} else if (line.trim().startsWith("USGS") && ! lineContains(line, filterStrings)) {
         		
         		String[] values = line.split("\t");
-        		StreamflowStation station = getStationByID(values[1]);
+        		String stationID = values[1];
+        		StreamflowStation station = getStationByID(stationID);
+        		SurfaceObsLocation location = new SurfaceObsLocation();
         		
         		if (station != null && values.length > 6) {
             		
-        			String stationid = values[1];
+        			location.setElevation(Math.round(station.getElevation()));
+        			location.setGeometry(station.getGeometry());
+        			location.setStationId(stationID);
+        			
             		String dateString = values[2];
             		String timeZone = values[3];
         			String cfs = values[4];
@@ -59,15 +64,12 @@ public class StreamflowDecoder {
             		
             		if (! cfs.isEmpty() ) {
             			StreamflowRecord record = new StreamflowRecord();
-            			record.setStationID(stationid);
+            			record.setName(station.getStationName());
                 		record.setCfs(Float.parseFloat(cfs));
                 		record.setHeight(Float.parseFloat(height));
                 		record.setStatus(status);
                 		record.setDataTime(new DataTime(date));
-            			record.setElevation(station.getElevation());
-            			record.setStationName(station.getStationName());
-            			record.setGeometry(station.getGeometry());
-            			                		
+                		record.setLocation(location);
                 		list.add(record);
             		}
         		}
@@ -93,7 +95,7 @@ public class StreamflowDecoder {
         try {
             station = streamflowStationDao.queryByStationId(stationid);
             if (station == null) {
-                throw new IOException("No station found for station_id = " + stationid);
+                throw new IOException("No station found for stationid = " + stationid);
             }
 
         } catch (Exception e) {
