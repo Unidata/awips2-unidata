@@ -1,5 +1,8 @@
 package edu.ucar.unidata.common.dataplugin.spc;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -45,20 +48,73 @@ import com.vividsolutions.jts.geom.Geometry;
 public class SPCRecord extends PluginDataObject {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String[] TORNADO_OUTLOOK = {
+			"2 %",
+			"5 %",
+			"10 %",
+			"15 %",
+			"30 %",
+			"45 %",
+			"60 %",
+			"Sig"
+	};
+	
+	public static final String[] HAILWIND_OUTLOOK = {
+			"5 %",
+			"15 %",
+			"30 %",
+			"45 %",
+			"60 %",
+			"Sig"
+	};
+		
+	public static final String[] TSTORM_OUTLOOK = {
+			"10 %",
+			"40 %",
+			"70 %"
+	};
+	
+	private static final String[] convectiveCategory= { 
+			"TSTM", 
+			"MRGL", 
+			"SLGT", 
+			"ENH", 
+			"MDT", 
+			"HIGH"
+	};
+
+	private static final String[] convectiveCategoryName = { 
+			"General Thunder",
+			"Marginal Risk",
+			"Slight Risk",
+			"Enhanced Risk",
+			"Moderate Risk",
+			"High Risk"
+	};
+	
+	public static Map<String, String> CONVECTIVE_OUTLOOK = 
+			mapDefinitions(convectiveCategoryName, convectiveCategory);
 
 	public static final String PLUGIN_NAME = "spc";
+
+	// report type
+	@Column(length = 32)
+	@DynamicSerializeElement
+	@DataURI(position = 1)
+	String reportType;
 
 	// report name
 	@Column(length = 32)
 	@DynamicSerializeElement
-	@DataURI(position = 1)
-	String reportName;
-
+	@DataURI(position = 2)
+	String typeCategory;
+	
 	// report part
 	@Column
     @DynamicSerializeElement
-    @DataURI(position = 2)
-    private Integer part;
+    @DataURI(position = 3)
+    Integer reportPart;
 
 	@Column(name = "location", columnDefinition = "geometry")
 	@Type(type = "org.hibernate.spatial.GeometryType")
@@ -70,8 +126,8 @@ public class SPCRecord extends PluginDataObject {
      * Default Constructor
      */
     public SPCRecord() {
-        this.part = null;
-        this.reportName = SPCRecord.PLUGIN_NAME;
+        this.reportType = SPCRecord.PLUGIN_NAME;
+        this.typeCategory = null;
         this.geometry = null;
     }
 
@@ -82,21 +138,29 @@ public class SPCRecord extends PluginDataObject {
 	public void setGeometry(Geometry geometry) {
 		this.geometry = geometry;
 	}
+
+	public void setReportPart(Integer part) {
+		this.reportPart = part;
+	}
 	
-	public Integer getPart() {
-		return part;
+	public Integer getReportPart() {
+		return reportPart;
 	}
 
-	public void setPart(Integer part) {
-		this.part = part;
+	public String getTypeCategory() {
+		return typeCategory;
 	}
 
-	public String getReportName() {
-		return reportName;
+	public void setTypeCategory(String typeCategory) {
+		this.typeCategory = typeCategory;
 	}
 
-	public void setReportName(String reportName) {
-		this.reportName = reportName;
+	public String getReportType() {
+		return reportType;
+	}
+
+	public void setReportType(String reportType) {
+		this.reportType = reportType;
 	}
 
     @Override
@@ -109,6 +173,16 @@ public class SPCRecord extends PluginDataObject {
 	@Override
 	public String getPluginName() {
 		return PLUGIN_NAME;
+	}
+	
+	public static Map<String, String> mapDefinitions(String[] s1, String[] s2) {
+		Map<String, String> mapping = new LinkedHashMap<>();
+		int i=0;
+		for (String name : s1 ) {
+			mapping.put(name, s2[i]);
+			i++;
+		}
+		return mapping;
 	}
 
 }

@@ -18,20 +18,6 @@
 	      </handler>
 	</extension>
 	
-	<extension
-	      point="org.eclipse.ui.menus">
-	      <menuContribution
-             locationURI="menu:radar">
-             <command
-                   label="AQI Resource"
-                   commandId="com.raytheon.uf.viz.ui.loadbundle">
-                   <parameter
-                   		 name="bundleFile"
-                         value="bundles/aqi/resource.xml">
-                   </parameter>
-             </command>
-	      </menuContribution>
-	</extension>
 	
 	<extension
 	      point="com.raytheon.viz.ui.contextualMenu">
