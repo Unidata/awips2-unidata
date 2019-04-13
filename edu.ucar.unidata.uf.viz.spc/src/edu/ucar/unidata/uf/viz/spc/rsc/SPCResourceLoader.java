@@ -1,4 +1,4 @@
-package edu.ucar.unidata.uf.viz.spc.rsc.handler;
+package edu.ucar.unidata.uf.viz.spc.rsc;
 
 import java.util.HashMap;
 
@@ -19,7 +19,6 @@ import com.raytheon.uf.viz.core.rsc.LoadProperties;
 import com.raytheon.uf.viz.core.rsc.ResourceProperties;
 
 import edu.ucar.unidata.common.dataplugin.spc.SPCRecord;
-import edu.ucar.unidata.uf.viz.spc.rsc.SPCResourceData;
 
 /**
  * SOFTWARE HISTORY

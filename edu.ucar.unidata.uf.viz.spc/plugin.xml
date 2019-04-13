@@ -18,29 +18,4 @@
 	      </handler>
 	</extension>
 	
-	<extension
-	      point="org.eclipse.ui.menus">
-	      <menuContribution
-             locationURI="menu:radar">
-             <command
-                   label="SPC Resource"
-                   commandId="com.raytheon.uf.viz.ui.loadbundle">
-                   <parameter
-                   		 name="bundleFile"
-                         value="bundles/spc/resource.xml">
-                   </parameter>
-             </command>
-	      </menuContribution>
-	</extension>
-	
-	<extension
-	      point="com.raytheon.viz.ui.contextualMenu">
-	    <contextualMenu
-	          actionClass="edu.ucar.unidata.uf.viz.spc.ui.OpenSPCInfoAction"
-	          capabilityInterface="edu.ucar.unidata.uf.viz.spc.ISPCDataResource"
-	          name="SPC info..."
-	          sortID="50">
-	    </contextualMenu>
-	</extension>
-	
 </plugin>
