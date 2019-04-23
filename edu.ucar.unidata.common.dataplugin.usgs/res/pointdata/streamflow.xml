@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<pointDataDescription>
-  <parameter name="stationName" numDims="1" type="STRING" />
-  <parameter name="stationId" numDims="1" type="STRING" />
-  <parameter name="cfs" numDims="1" type="FLOAT" unit="m/s" />
-  <parameter name="height" numDims="1" type="FLOAT" unit="ft" />
-  <parameter name="status" numDims="1" type="STRING" />
-</pointDataDescription>

@@ -23,35 +23,7 @@
    </requires>
 
    <plugin
-         id="edu.ucar.unidata.common.dataplugin.usgs"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="edu.ucar.unidata.common.dataplugin.aqi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="edu.ucar.unidata.common.dataplugin.spc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="edu.ucar.unidata.uf.viz.aqi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="edu.ucar.unidata.uf.viz.usgs"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -65,7 +37,14 @@
          unpack="false"/>
 
    <plugin
-         id="edu.ucar.unidata.uf.viz.streamgauge"
+         id="edu.ucar.unidata.common.dataplugin.streamflow"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.ucar.unidata.uf.viz.streamflow"
          download-size="0"
          install-size="0"
          version="0.0.0"
