@@ -116,7 +116,7 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 
 	protected SPCResource(SPCResourceData resourceData,
 			LoadProperties loadProperties, PluginDataObject[] pdos) {
-		super(resourceData, loadProperties);
+		super(resourceData, loadProperties, false);
 		resourceData.addChangeListener(new IResourceDataChanged() {
 			@Override
 			public void resourceChanged(ChangeType type, Object object) {
@@ -130,7 +130,6 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 				issueRefresh();
 			} 
 		});
-		this.dataTimes = new ArrayList<DataTime>();
 	}
 	
 	@Override
@@ -362,7 +361,6 @@ public class SPCResource extends AbstractVizResource<SPCResourceData, MapDescrip
 		}
 		if (brandNew) {
 			this.dataTimes.add(dataTime);
-			Collections.sort(this.dataTimes);
 		}
 		records.add(obj);
 	}
