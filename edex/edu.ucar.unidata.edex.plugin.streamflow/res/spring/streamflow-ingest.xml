@@ -23,7 +23,7 @@
 		
 		<route id="streamflowIngestRoute">
 			<from uri="jms-durable:queue:Ingest.Streamflow" />
-			<setHeader headerName="pluginName">
+			<setHeader name="pluginName">
 				<constant>streamflow</constant>
 			</setHeader>
 			<doTry>

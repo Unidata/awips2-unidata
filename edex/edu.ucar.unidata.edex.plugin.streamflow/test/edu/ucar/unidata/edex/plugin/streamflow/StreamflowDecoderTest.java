@@ -1,3 +1,5 @@
+package edu.ucar.unidata.edex.plugin.streamflow;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,7 +23,7 @@ public class StreamflowDecoderTest {
             String input = new String();
             String lineRead = null;
             while ((lineRead = buf.readLine()) != null) {
-                // System.out.println("Read in a line "+lineRead);
+                System.out.println("Read in a line "+lineRead);
                 input += lineRead + "\n";
             }
 
@@ -43,3 +45,4 @@ public class StreamflowDecoderTest {
     }
 
 }
+

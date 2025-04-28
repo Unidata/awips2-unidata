@@ -1,0 +1,4 @@
+<requestPatterns xmlns:ns2="group">
+    <regex>airnow*</regex>
+    <regex>aqi*</regex>
+</requestPatterns>

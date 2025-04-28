@@ -117,7 +117,6 @@ public class SPCRecord extends PluginDataObject {
     Integer reportPart;
 
 	@Column(name = "location", columnDefinition = "geometry")
-	@Type(type = "org.hibernate.spatial.GeometryType")
 	@XmlJavaTypeAdapter(value = GeometryAdapter.class)
 	@DynamicSerializeElement
 	private Geometry geometry;

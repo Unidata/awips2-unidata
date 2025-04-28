@@ -75,7 +75,6 @@ public class StreamflowStation  implements ISpatialObject {
     private Float elevation;
     
     @Column(name = "the_geom")
-    @Type(type = "org.hibernate.spatial.GeometryType")
     @XmlJavaTypeAdapter(value = GeometryAdapter.class)
     @DynamicSerializeElement
     private Point location;
