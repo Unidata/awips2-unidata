@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Aqi
+Bundle-SymbolicName: edu.ucar.unidata.edex.aqi
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Unidata
+Automatic-Module-Name: edu.ucar.unidata.edex.aqi
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: com.raytheon.uf.common.dataplugin,
+ com.raytheon.uf.common.geospatial,
+ edu.ucar.unidata.common.dataplugin.aqi,
+ org.dom4j,
+ com.raytheon.uf.common.status
