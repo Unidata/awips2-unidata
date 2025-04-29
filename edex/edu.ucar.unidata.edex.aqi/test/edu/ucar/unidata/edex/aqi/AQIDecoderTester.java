@@ -13,7 +13,7 @@ public class AQIDecoderTester {
 
     public static void main(String[] args) {
         try {
-                String fileString = new String(Files.readAllBytes(Paths.get("/home/awips/airnow_conditions.kml")), StandardCharsets.UTF_8);
+                String fileString = new String(Files.readAllBytes(Paths.get("airnow_conditions.kml")), StandardCharsets.UTF_8);
 
             AQIDecoder decoder = new AQIDecoder();
             try {
