@@ -21,4 +21,5 @@ Require-Bundle: com.raytheon.uf.common.dataplugin;bundle-version="1.12.1174",
 Export-Package: edu.ucar.unidata.edex.plugin.streamflow
 Import-Package: com.raytheon.uf.common.datastorage,
  com.raytheon.uf.common.datastorage.records,
+ org.openhab.core.library.dimension,
  ucar.nc2.ft
