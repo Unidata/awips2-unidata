@@ -16,11 +16,11 @@ Require-Bundle: com.raytheon.uf.common.serialization,
  com.raytheon.uf.common.dataaccess;bundle-version="1.16.0",
  javax.measure
 Export-Package: edu.ucar.unidata.common.dataplugin.streamflow
-Import-Package: javax.measure,
+Import-Package: jakarta.xml.bind,
+ jakarta.xml.bind.annotation.adapters,
+ javax.measure,
  javax.measure.quantity,
- javax.xml.bind,
  javax.xml.bind.annotation,
- javax.xml.bind.annotation.adapters,
  org.openhab.core.library.dimension,
  si.uom,
  systems.uom.common

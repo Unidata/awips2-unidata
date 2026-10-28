@@ -17,7 +17,12 @@
 	<camelContext id="spc-camel"
 		xmlns="http://camel.apache.org/schema/spring"
 		errorHandlerRef="errorHandler">
-
+		
+		<!-- Use unique template bean IDs to avoid collisions with other EDEX Camel contexts. -->
+		<template id="spcProducerTemplate" />
+		<fluentTemplate id="spcFluentTemplate" />
+		<consumerTemplate id="spcConsumerTemplate" />
+		
 		<route id="spcIngestRoute">
 			<from uri="jms-durable:queue:Ingest.Spc" />
 			<setHeader name="pluginName">
@@ -27,7 +32,7 @@
 				<pipeline>
 					<bean ref="stringToFile" />
 					<bean ref="spcDecoder" method="decode" />
-					<to uri="direct-vm:persistIndexAlert" />
+					<to uri="direct:persistIndexAlert" />
 				</pipeline>
 				<doCatch>
 					<exception>java.lang.Throwable</exception>

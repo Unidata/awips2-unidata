@@ -9,5 +9,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: com.raytheon.uf.common.dataplugin,
  com.raytheon.uf.common.serialization,
  com.raytheon.uf.common.geospatial,
- javax.xml.bind;bundle-version="2.4.0"
+ jakarta.xml.bind;bundle-version="4.0.2"
 Export-Package: edu.ucar.unidata.common.dataplugin.aqi

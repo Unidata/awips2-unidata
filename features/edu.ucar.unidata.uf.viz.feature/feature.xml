@@ -35,7 +35,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
+<!-- Comment Out
    <plugin
          id="edu.ucar.unidata.common.dataplugin.streamflow"
          download-size="0"
@@ -63,5 +63,5 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
+-->
 </feature>
